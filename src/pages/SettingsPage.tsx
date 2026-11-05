@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { TextAreaField } from '@/components/keuangan/FinanceModal'
 import { FinanceToast } from '@/components/keuangan/FinanceToast'
+import { AvatarEditor } from '@/components/settings/AvatarEditor'
 import { AlertCard } from '@/components/ui/AlertCard'
 import { StatusPill } from '@/components/keuangan/StatusPill'
-import { CameraIcon } from '@/components/ui/icons'
 import { Select } from '@/components/ui/Select'
 import { Switch } from '@/components/ui/Switch'
 import { TextField } from '@/components/ui/TextField'
@@ -345,7 +345,6 @@ function SwitchBlock({ children }: { children: ReactNode }) {
 export function SettingsPage() {
   const { user, logout } = useAuth()
   const stored = useMemo(() => loadStored(), [])
-  const avatarInputRef = useRef<HTMLInputElement>(null)
   const [tab, setTab] = useState<SettingsTab>('profil')
   const [toast, setToast] = useState<string | null>(null)
   const [cloudAlert, setCloudAlert] = useState<string | null>(null)
@@ -533,56 +532,19 @@ export function SettingsPage() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-line bg-panel px-4 py-4 sm:px-5">
         <div className="flex min-w-0 items-center gap-3.5">
-          <div className="relative">
-            <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-brand-100 text-[18px] font-semibold text-brand-800">
-              {profile.avatarUrl ? (
-                <img
-                  src={profile.avatarUrl}
-                  alt=""
-                  className="size-full object-cover"
-                />
-              ) : (
-                initials || 'U'
-              )}
-            </div>
-            <input
-              ref={avatarInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="sr-only"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                e.target.value = ''
-                if (!file) return
-                if (file.size > 2 * 1024 * 1024) {
-                  notify('Foto maksimal 2 MB')
-                  return
-                }
-                const reader = new FileReader()
-                reader.onload = () => {
-                  const avatarUrl =
-                    typeof reader.result === 'string' ? reader.result : ''
-                  setProfile((p) => {
-                    const next = { ...p, avatarUrl }
-                    void saveStored({ profile: next })
-                    return next
-                  })
-                  setProfileBase((p) => ({ ...p, avatarUrl }))
-                  notify('Foto profil diperbarui')
-                }
-                reader.readAsDataURL(file)
-              }}
-            />
-            <button
-              type="button"
-              title="Ganti foto profil"
-              aria-label="Ganti foto profil"
-              onClick={() => avatarInputRef.current?.click()}
-              className="absolute -right-1 -bottom-1 flex size-7 items-center justify-center rounded-full border border-line bg-brand-800 text-white shadow-sm transition hover:bg-brand-900"
-            >
-              <CameraIcon className="size-3.5" />
-            </button>
-          </div>
+          <AvatarEditor
+            avatarUrl={profile.avatarUrl}
+            initials={initials || 'U'}
+            onNotify={notify}
+            onChange={(avatarUrl) => {
+              setProfile((p) => {
+                const next = { ...p, avatarUrl }
+                void saveStored({ profile: next })
+                return next
+              })
+              setProfileBase((p) => ({ ...p, avatarUrl }))
+            }}
+          />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="truncate text-[16px] font-semibold text-ink">
