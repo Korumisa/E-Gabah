@@ -157,7 +157,7 @@ export function PortalPage() {
                 {user?.roleLabel ?? 'Pengguna'}
               </span>
               {user?.email ? <> ({user.email})</> : null}. Pilih aplikasi, dibuka di
-              tab baru. Portal tetap di sini.
+              tab baru.
             </p>
           </div>
         </section>

@@ -7,7 +7,7 @@ do $$ begin
     'admin', 'pembelian', 'produksi', 'gudang', 'penjualan', 'keuangan'
   );
 exception when duplicate_object then null;
-end $$;
+end $$; 
 
 do $$ begin
   create type public.partner_kind as enum ('supplier', 'customer');
