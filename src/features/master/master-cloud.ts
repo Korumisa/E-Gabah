@@ -27,7 +27,23 @@ export function mapSupabaseError(err: unknown): string {
   if (code === '42501' || /permission|row-level security/i.test(msg)) {
     return 'Akun ini tidak berhak mengubah data tersebut.'
   }
-  return msg || 'Gagal menyimpan ke cloud.'
+  if (
+    /VITE_|dikonfigurasi|PGRST|JWT|relation |column |Failed to fetch|schema cache/i.test(
+      msg,
+    )
+  ) {
+    console.error(msg)
+    return 'Layanan sedang tidak tersedia. Coba lagi nanti.'
+  }
+  if (/invalid login|invalid credentials|email not confirmed/i.test(msg)) {
+    return 'Email atau kata sandi salah.'
+  }
+  if (!msg) return 'Tidak bisa menyelesaikan permintaan. Coba lagi.'
+  if (/^[A-Za-z0-9_ .:/-]+$/.test(msg)) {
+    console.error(msg)
+    return 'Tidak bisa menyelesaikan permintaan. Coba lagi.'
+  }
+  return msg
 }
 
 export async function loadProfileByUserId(userId: string): Promise<ProfileRow> {

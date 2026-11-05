@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           password,
         })
         if (error || !data.user) {
-          throw new Error(error?.message ?? 'Gagal masuk.')
+          throw new Error(mapSupabaseError(error ?? 'Gagal masuk.'))
         }
         let profile
         try {
@@ -111,9 +111,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (import.meta.env.PROD) {
         clearStoredUser()
         setUser(null)
-        throw new Error(
-          'Supabase belum dikonfigurasi. Set VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY di environment hosting.',
+        console.error(
+          'Supabase belum dikonfigurasi. Set VITE_SUPABASE_URL dan VITE_SUPABASE_ANON_KEY.',
         )
+        throw new Error('Layanan masuk sedang tidak tersedia. Coba lagi nanti.')
       }
 
       await new Promise((resolve) => setTimeout(resolve, 280))

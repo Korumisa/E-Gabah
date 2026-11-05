@@ -1,28 +1,25 @@
 # E-Gabah
 
-ERP berbasis web untuk usaha penggilingan padi (proyek EIS).
+ERP web untuk usaha penggilingan padi. Satu portal membuka E-Gabah, E-Absensi, dan E-HR. Yang terlihat di setiap modul mengikuti peran akun.
 
-## Stack
+## Modul
 
-- Vite + React + TypeScript
-- React Router
-- Tailwind CSS v4
+- **Operasi:** pembelian gabah, penerimaan, produksi, stok, penjualan
+- **Keuangan:** kas, utang, piutang, jurnal, pajak, periode
+- **SDM:** absensi dengan lokasi, cuti, persetujuan, dan persiapan gaji
 
-## Menjalankan lokal
+Data operasional, absensi, cuti, dan pengaturan organisasi tersimpan di Supabase.
+
+## Menjalankan
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Alur MVP saat ini
+Salin `.env.example` menjadi `.env.local`, lalu isi `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY`.
 
-1. `/login` — autentikasi mock + pilih peran RBAC
-2. `/portal` — hub modul (mirip portal SSO)
-3. `/app/*` — halaman modul (shell + placeholder)
-
-Auth masih disimpan di `localStorage`. Siap diganti Supabase Auth nanti.
-
-## Modul
-
-Dashboard, Master Data, Pembelian, Persediaan, Produksi, Penjualan, Keuangan.
+```bash
+npm run build
+npm run smoketest-no-compile
+```
