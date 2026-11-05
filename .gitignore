@@ -23,6 +23,8 @@ dist-ssr
 supabase/.temp/
 
 # Editor
+.cursor/
+.audit/
 .vscode/*
 !.vscode/extensions.json
 .idea
