@@ -79,7 +79,10 @@ Tanpa `VITE_SUPABASE_*` di production build, login ditolak (demo auth mati).
 3. Deploy Edge Function login alert:
    - `supabase functions deploy login-alert`
    - `supabase secrets set RESEND_API_KEY=re_…`
-   - Tanpa Resend: alert tetap tercatat di `login_alerts`, email dilewati.
+   - **Domain email (produksi):** di [Resend](https://resend.com/domains) verifikasi domain (DNS SPF/DKIM), lalu set pengirim:
+     `supabase secrets set LOGIN_ALERT_FROM="E-Gabah <noreply@domain-anda.com>"`
+   - Default tanpa secret: `E-Gabah <onboarding@resend.dev>` — hanya cocok uji ke alamat akun Resend.
+   - Tanpa `RESEND_API_KEY`: alert tetap tercatat di `login_alerts`, email dilewati.
 4. Smoke live (atau `npm run smoketest` + `npm run e2e:need-live` dengan `SMOKE_BASE`):
    - Login → **Portal** → E-Gabah / E-Absensi / E-HR (role non-HR tidak lihat E-HR)
    - Master → Organisasi & lokasi: tambah jabatan, reload device lain → opsi muncul
