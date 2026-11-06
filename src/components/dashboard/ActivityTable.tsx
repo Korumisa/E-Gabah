@@ -341,55 +341,59 @@ export function ActivityTable({ rows }: { rows: ActivityRow[] }) {
         </table>
       </div>
 
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-        <p className="shrink-0 text-[12px] text-muted">
+      <div className="mt-3 flex w-full flex-col gap-2.5 border-t border-line/70 pt-3">
+        <p className="text-[12px] text-muted">
           {filtered.length === 0
             ? 'Menampilkan 0 dari 0 dokumen'
             : `Menampilkan ${from}–${to} dari ${filtered.length} dokumen`}
         </p>
-        <div className="flex flex-wrap items-center justify-end gap-1">
-          <button
-            type="button"
-            disabled={safePage <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            className="rounded-xl border border-line px-2.5 py-1.5 text-[12px] font-medium text-ink transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Sebelumnya
-          </button>
-          {pageItems.map((item, index) =>
-            item === '…' ? (
-              <span
-                key={`e-${index}`}
-                className="flex size-8 items-center justify-center font-mono text-[12px] text-muted"
-              >
-                …
-              </span>
-            ) : (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setPage(item)}
-                aria-current={item === safePage ? 'page' : undefined}
-                className={[
-                  'flex size-8 items-center justify-center rounded-xl font-mono text-[12px] transition',
-                  item === safePage
-                    ? 'bg-brand-800 font-semibold text-white'
-                    : 'border border-line text-ink hover:bg-brand-50',
-                ].join(' ')}
-              >
-                {item}
-              </button>
-            ),
-          )}
-          <button
-            type="button"
-            disabled={safePage >= totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            className="rounded-xl border border-line px-2.5 py-1.5 text-[12px] font-medium text-ink transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Berikutnya
-          </button>
-        </div>
+        {totalPages > 1 ? (
+          <div className="flex w-full items-center justify-between gap-2">
+            <button
+              type="button"
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="shrink-0 rounded-xl border border-line px-2.5 py-1.5 text-[12px] font-medium text-ink transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Sebelumnya
+            </button>
+            <div className="flex flex-wrap items-center justify-center gap-1">
+              {pageItems.map((item, index) =>
+                item === '…' ? (
+                  <span
+                    key={`e-${index}`}
+                    className="flex size-8 items-center justify-center font-mono text-[12px] text-muted"
+                  >
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setPage(item)}
+                    aria-current={item === safePage ? 'page' : undefined}
+                    className={[
+                      'flex size-8 items-center justify-center rounded-xl font-mono text-[12px] transition',
+                      item === safePage
+                        ? 'bg-brand-800 font-semibold text-white'
+                        : 'border border-line text-ink hover:bg-brand-50',
+                    ].join(' ')}
+                  >
+                    {item}
+                  </button>
+                ),
+              )}
+            </div>
+            <button
+              type="button"
+              disabled={safePage >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="shrink-0 rounded-xl border border-line px-2.5 py-1.5 text-[12px] font-medium text-ink transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Berikutnya
+            </button>
+          </div>
+        ) : null}
       </div>
 
       {detail ? (
