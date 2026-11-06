@@ -12,6 +12,8 @@ const KEYS = [
   'egabah.settings.v2',
 ] as const
 
+const KEY_SET = new Set<string>(KEYS)
+
 export type AppBackup = {
   version: 1
   exportedAt: string
@@ -60,7 +62,8 @@ export function restoreBackup(payload: unknown): { ok: true } | { ok: false; err
   }
   try {
     for (const [key, value] of Object.entries(p.data)) {
-      if (!key.startsWith('egabah.')) continue
+      // Same allowlist as export — never restore auth/session or other egabah.* keys.
+      if (!KEY_SET.has(key)) continue
       localStorage.setItem(key, JSON.stringify(value))
     }
     return { ok: true }

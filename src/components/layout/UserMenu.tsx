@@ -55,9 +55,10 @@ export function UserMenu() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 items-center gap-2.5 rounded-xl border border-line bg-panel px-2.5 text-left transition hover:border-brand-300 hover:bg-brand-50/50"
+        className="flex h-10 items-center gap-2.5 rounded-xl border border-line bg-panel px-2.5 text-left transition hover:border-brand-300 hover:bg-brand-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label={`Menu akun, ${displayName}`}
       >
         <span className="flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-700 text-[12px] font-semibold text-white">
           {profile.avatarUrl ? (

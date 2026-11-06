@@ -15,6 +15,11 @@ import {
   touchActivity,
 } from '@/lib/auth-storage'
 import { findDemoAccount, toAuthUser } from '@/features/auth/demo-users'
+import { notifyLoginAlert } from '@/features/auth/login-alert'
+import {
+  challengeAndVerifyTotp,
+  getMfaNeedsChallenge,
+} from '@/features/auth/mfa'
 import {
   authUserFromProfile,
   loadProfileByUserId,
@@ -36,7 +41,12 @@ type AuthContextValue = {
   isAuthenticated: boolean
   /** False until first session/profile resolve (Supabase) or local boot. */
   authReady: boolean
-  login: (input: LoginInput) => Promise<void>
+  /** Password OK, menunggu kode TOTP (sesi aal1). */
+  mfaRequired: boolean
+  /** Resolves `true` jika perlu langkah TOTP. */
+  login: (input: LoginInput) => Promise<boolean>
+  verifyMfa: (code: string) => Promise<void>
+  cancelMfa: () => Promise<void>
   logout: () => void
 }
 
@@ -64,16 +74,38 @@ function bootUser(): AuthUser | null {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => bootUser())
   const [authReady, setAuthReady] = useState(() => !isSupabaseConfigured())
+  const [mfaRequired, setMfaRequired] = useState(false)
+  const [rememberMfa, setRememberMfa] = useState(true)
 
   const logout = useCallback(() => {
     void flushPendingRelationalSaves().finally(() => {
       clearStoredUser()
       setUser(null)
+      setMfaRequired(false)
       if (isSupabaseConfigured()) {
         void getSupabase()?.auth.signOut()
       }
     })
   }, [])
+
+  const finishWithProfile = useCallback(
+    async (userId: string, remember: boolean, opts?: { alertLogin?: boolean }) => {
+      const profile = await loadProfileByUserId(userId)
+      if (!profile.active) {
+        await getSupabase()?.auth.signOut()
+        throw new Error('Akun nonaktif. Hubungi admin.')
+      }
+      const nextUser = authUserFromProfile(profile)
+      saveStoredUser(nextUser, remember)
+      setUser(nextUser)
+      setMfaRequired(false)
+      setAuthReady(true)
+      if (opts?.alertLogin) {
+        void notifyLoginAlert()
+      }
+    },
+    [],
+  )
 
   const login = useCallback(
     async ({ email, password, remember = true }: LoginInput) => {
@@ -90,22 +122,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error || !data.user) {
           throw new Error(mapSupabaseError(error ?? 'Gagal masuk.'))
         }
-        let profile
+
+        setRememberMfa(remember)
+        const needsMfa = await getMfaNeedsChallenge()
+        if (needsMfa) {
+          clearStoredUser()
+          setUser(null)
+          setMfaRequired(true)
+          setAuthReady(true)
+          return true
+        }
+
         try {
-          profile = await loadProfileByUserId(data.user.id)
+          await finishWithProfile(data.user.id, remember, { alertLogin: true })
         } catch (e) {
           await sb.auth.signOut()
+          setMfaRequired(false)
           throw new Error(mapSupabaseError(e))
         }
-        if (!profile.active) {
-          await sb.auth.signOut()
-          throw new Error('Akun nonaktif. Hubungi admin.')
-        }
-        const nextUser = authUserFromProfile(profile)
-        saveStoredUser(nextUser, remember)
-        setUser(nextUser)
-        setAuthReady(true)
-        return
+        return false
       }
 
       if (import.meta.env.PROD) {
@@ -129,10 +164,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const nextUser = toAuthUser(account)
       saveStoredUser(nextUser, remember)
       setUser(nextUser)
+      setMfaRequired(false)
       setAuthReady(true)
+      return false
     },
-    [],
+    [finishWithProfile],
   )
+
+  const verifyMfa = useCallback(
+    async (code: string) => {
+      const sb = getSupabase()
+      if (!sb) throw new Error('Supabase belum dikonfigurasi')
+      await challengeAndVerifyTotp(code)
+      const { data } = await sb.auth.getUser()
+      if (!data.user) throw new Error('Sesi hilang setelah MFA')
+      await finishWithProfile(data.user.id, rememberMfa, { alertLogin: true })
+    },
+    [finishWithProfile, rememberMfa],
+  )
+
+  const cancelMfa = useCallback(async () => {
+    clearStoredUser()
+    setUser(null)
+    setMfaRequired(false)
+    await getSupabase()?.auth.signOut()
+  }, [])
 
   useEffect(() => {
     if (!isSupabaseConfigured()) {
@@ -153,25 +209,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function syncFromSession(uid: string | undefined) {
       if (!uid) {
         clearStoredUser()
-        if (!cancelled) setUser(null)
+        if (!cancelled) {
+          setUser(null)
+          setMfaRequired(false)
+        }
         return
       }
       try {
+        const needsMfa = await getMfaNeedsChallenge()
+        if (cancelled) return
+        if (needsMfa) {
+          clearStoredUser()
+          setUser(null)
+          setMfaRequired(true)
+          return
+        }
         const profile = await loadProfileByUserId(uid)
         if (cancelled) return
         if (!profile.active) {
           clearStoredUser()
           setUser(null)
+          setMfaRequired(false)
           await sb!.auth.signOut()
           return
         }
         const next = authUserFromProfile(profile)
         saveStoredUser(next, true)
         setUser(next)
+        setMfaRequired(false)
       } catch {
-        // Keep optimistic user if profile fetch fails transiently;
-        // only clear when there is truly no session (handled above).
-        if (!cancelled && !loadStoredUser()) setUser(null)
+        clearStoredUser()
+        if (!cancelled) {
+          setUser(null)
+          setMfaRequired(false)
+        }
+        try {
+          await sb!.auth.signOut()
+        } catch {
+          /* ignore */
+        }
       }
     }
 
@@ -189,7 +265,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         window.setTimeout(() => {
           void flushPendingRelationalSaves().finally(() => {
             clearStoredUser()
-            if (!cancelled) setUser(null)
+            if (!cancelled) {
+              setUser(null)
+              setMfaRequired(false)
+            }
           })
         }, 0)
         return
@@ -198,6 +277,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         event === 'SIGNED_IN' ||
         event === 'TOKEN_REFRESHED' ||
         event === 'USER_UPDATED' ||
+        event === 'MFA_CHALLENGE_VERIFIED' ||
         event === 'INITIAL_SESSION'
       ) {
         void syncFromSession(session?.user?.id)
@@ -242,10 +322,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       isAuthenticated: Boolean(user),
       authReady,
+      mfaRequired,
       login,
+      verifyMfa,
+      cancelMfa,
       logout,
     }),
-    [user, authReady, login, logout],
+    [user, authReady, mfaRequired, login, verifyMfa, cancelMfa, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -22,6 +22,7 @@ import {
 } from '@/components/ops/DetailDrawer'
 import { EyeIcon } from '@/components/ui/icons'
 import { TextField } from '@/components/ui/TextField'
+import { formatDisplayDate } from '@/lib/display-date'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useFinanceStore } from '@/features/keuangan/finance-store'
 import type { PeriodLock, UnlockRequest } from '@/features/keuangan/period-data'
@@ -43,13 +44,11 @@ function lockLabel(lock: PeriodLock): string {
 }
 
 function formatIsoDisplay(iso: string): string {
-  const d = new Date(`${iso.slice(0, 10)}T12:00:00`)
-  if (Number.isNaN(d.getTime())) return iso
-  return new Intl.DateTimeFormat('id-ID', {
+  return formatDisplayDate(iso, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(d)
+  })
 }
 
 function canManageLocks(role: UserRole | undefined): boolean {

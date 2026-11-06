@@ -2,14 +2,9 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '@/features/auth/AuthContext'
 
 export function RequireAuth() {
-  const { isAuthenticated, authReady, user } = useAuth()
+  const { isAuthenticated, authReady, mfaRequired } = useAuth()
   const location = useLocation()
   const here = `${location.pathname}${location.search}`
-
-  // Optimistic user: allow through while session confirms.
-  if (user) {
-    return <Outlet />
-  }
 
   if (!authReady) {
     return (
@@ -23,7 +18,7 @@ export function RequireAuth() {
     )
   }
 
-  if (!isAuthenticated) {
+  if (mfaRequired || !isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: here }} />
   }
 

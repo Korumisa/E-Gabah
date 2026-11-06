@@ -24,6 +24,7 @@ import {
 } from '@/components/ops/DetailDrawer'
 import { StageLabel } from '@/components/produksi/StatusLabel'
 import { PromptDialog } from '@/components/ui/ConfirmDialog'
+import { AlertCard } from '@/components/ui/AlertCard'
 import { EyeIcon } from '@/components/ui/icons'
 import { useAuth } from '@/features/auth/AuthContext'
 import {
@@ -87,18 +88,28 @@ export function BatchView({
 
   const stats = useMemo(() => buildBatchStats(batches), [batches])
 
+  const [dokMissing, setDokMissing] = useState<string | null>(null)
+
   useEffect(() => {
     if (!toast) return
-    const t = window.setTimeout(() => setToast(null), 2200)
+    const t = window.setTimeout(() => setToast(null), 3200)
     return () => window.clearTimeout(t)
   }, [toast])
 
   useEffect(() => setPage(1), [search, filter])
 
   useEffect(() => {
-    if (!selectedId) return
+    if (!selectedId) {
+      setDokMissing(null)
+      return
+    }
     const row = batches.find((b) => b.id === selectedId)
-    if (row) setDetail(row)
+    if (row) {
+      setDetail(row)
+      setDokMissing(null)
+    } else {
+      setDokMissing(selectedId)
+    }
   }, [selectedId, batches])
 
   const filtered = useMemo(() => {
@@ -174,8 +185,14 @@ export function BatchView({
 
   return (
     <div className="space-y-2.5">
+      {toast ? <FinanceToast message={toast} /> : null}
+      {dokMissing ? (
+        <AlertCard tone="danger">
+          Batch {dokMissing} tidak ditemukan. Tutup tautan atau pilih batch lain
+          dari daftar.
+        </AlertCard>
+      ) : null}
       <FinanceStatGrid stats={stats} />
-      <FinanceToast message={toast} />
 
       <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
         <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
@@ -335,7 +352,7 @@ export function BatchView({
                     type="button"
                     onClick={() => {
                       onApprove(detail.id)
-                      setToast('Batch disetujui')
+                      setToast(`Batch ${detail.id} disetujui`)
                     }}
                     className="h-11 w-full rounded-xl border border-line text-[14px] font-medium text-ink transition hover:bg-surface"
                   >

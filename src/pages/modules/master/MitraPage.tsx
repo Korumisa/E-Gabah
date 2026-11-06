@@ -9,6 +9,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -408,7 +410,42 @@ export function MitraPage() {
           onSecondaryFilterChange={setStatus}
         />
 
-        <FinanceTable>
+        <FinanceTable
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada data." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.name}
+                  subtitle={
+                    row.contactName ? `PIC: ${row.contactName}` : row.id
+                  }
+                  badges={
+                    <>
+                      <StatusPill
+                        label={PARTNER_KIND_LABEL[row.kind]}
+                        tone={row.kind === 'supplier' ? 'neutral' : 'good'}
+                      />
+                      <StatusPill
+                        label={row.active ? 'Aktif' : 'Nonaktif'}
+                        tone={row.active ? 'good' : 'muted'}
+                      />
+                    </>
+                  }
+                  facts={[
+                    { label: 'Segmen', value: row.group || '—' },
+                    { label: 'Area', value: row.area },
+                    { label: 'Telepon', value: row.phone || '—' },
+                    { label: 'Tempo', value: `${row.paymentTermDays}h` },
+                  ]}
+                  onClick={() => setDetail(row)}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-10">#</FinanceTh>
             <FinanceSortTh

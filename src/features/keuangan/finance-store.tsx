@@ -33,6 +33,7 @@ import {
 } from '@/features/keuangan/period-helpers'
 import { computePpn } from '@/features/keuangan/tax-compute'
 import type { PpnRate, PriceMode, TaxDoc } from '@/features/keuangan/tax-data'
+import { parseDisplayDate } from '@/lib/display-date'
 import {
   formatDateId,
   nextCashRef,
@@ -174,13 +175,13 @@ type FinanceStoreValue = {
 const FinanceStoreContext = createContext<FinanceStoreValue | null>(null)
 
 function dueLabel(iso: string): string {
-  const d = new Date(`${iso}T00:00:00`)
+  const d = parseDisplayDate(iso)
   if (Number.isNaN(d.getTime())) return iso
   return formatDateId(d)
 }
 
 function agingFromDue(iso: string): number {
-  const due = new Date(`${iso}T00:00:00`)
+  const due = parseDisplayDate(iso)
   if (Number.isNaN(due.getTime())) return 0
   const today = new Date()
   today.setHours(0, 0, 0, 0)

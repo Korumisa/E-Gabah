@@ -12,6 +12,7 @@ import { usePayrollStore } from '@/features/payroll/payroll-store'
 import { usePembelian } from '@/features/pembelian/PembelianContext'
 import { usePenjualan } from '@/features/penjualan/PenjualanContext'
 import { useProduksi } from '@/features/produksi/ProduksiContext'
+import { formatDisplayDate } from '@/lib/display-date'
 import { ROLE_LABELS } from '@/types/auth'
 
 const KIND_LABEL: Record<InboxItem['kind'], string> = {
@@ -24,14 +25,12 @@ const KIND_LABEL: Record<InboxItem['kind'], string> = {
 }
 
 function formatWhen(iso: string): string {
-  const d = new Date(iso.length === 10 ? `${iso}T12:00:00` : iso)
-  if (Number.isNaN(d.getTime())) return iso
-  return new Intl.DateTimeFormat('id-ID', {
+  return formatDisplayDate(iso, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(d)
+  })
 }
 
 function sourceId(item: InboxItem): string {
@@ -148,7 +147,7 @@ export function InboxPage() {
       }
     }
     if (err) notify(err)
-    else notify('Disetujui')
+    else notify(`${item.title} disetujui`)
   }
 
   async function onRejectConfirm() {
@@ -169,11 +168,12 @@ export function InboxPage() {
     setRejectId(null)
     setRejectReason('')
     if (err) notify(err)
-    else notify('Ditolak')
+    else notify(`${item.title} ditolak`)
   }
 
   return (
     <div className="space-y-2.5">
+      {toast ? <FinanceToast message={toast} /> : null}
       <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
         <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
           <div>
@@ -182,7 +182,6 @@ export function InboxPage() {
               Pengajuan menunggu tindakan · {ROLE_LABELS[role]}
             </p>
           </div>
-          <FinanceToast message={toast} />
         </div>
 
         {items.length === 0 ? (

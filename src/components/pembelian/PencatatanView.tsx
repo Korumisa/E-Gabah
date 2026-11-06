@@ -30,6 +30,7 @@ import {
   DrawerSection,
 } from '@/components/ops/DetailDrawer'
 import { PromptDialog } from '@/components/ui/ConfirmDialog'
+import { AlertCard } from '@/components/ui/AlertCard'
 import { EyeIcon } from '@/components/ui/icons'
 import { useAuth } from '@/features/auth/AuthContext'
 import { hasProof } from '@/features/workflow/proof'
@@ -201,15 +202,25 @@ export function PencatatanView({
   const safePage = Math.min(page, pageCount)
   const rows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
 
+  const [dokMissing, setDokMissing] = useState<string | null>(null)
+
   useEffect(() => {
-    if (!selectedId) return
+    if (!selectedId) {
+      setDokMissing(null)
+      return
+    }
     const found = purchases.find((p) => p.id === selectedId)
-    if (found) setDetail(found)
+    if (found) {
+      setDetail(found)
+      setDokMissing(null)
+    } else {
+      setDokMissing(selectedId)
+    }
   }, [selectedId, purchases])
 
   useEffect(() => {
     if (!toast) return
-    const t = window.setTimeout(() => setToast(null), 2400)
+    const t = window.setTimeout(() => setToast(null), 3200)
     return () => window.clearTimeout(t)
   }, [toast])
 
@@ -230,6 +241,13 @@ export function PencatatanView({
 
   return (
     <div className="space-y-2.5">
+      {toast ? <FinanceToast message={toast} /> : null}
+      {dokMissing ? (
+        <AlertCard tone="danger">
+          Dokumen {dokMissing} tidak ditemukan. Tutup tautan atau pilih dokumen
+          lain dari daftar.
+        </AlertCard>
+      ) : null}
       <FinanceStatGrid stats={stats} />
 
       <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
@@ -240,7 +258,6 @@ export function PencatatanView({
               Catat pembelian gabah — lanjut ke penerimaan dan pembayaran
             </p>
           </div>
-          <FinanceToast message={toast} />
         </div>
 
         <FinanceFilterBar
@@ -437,7 +454,7 @@ export function PencatatanView({
               setToast(err)
               return
             }
-            setToast('Anggaran disetujui')
+            setToast(`Anggaran ${detail.id} disetujui`)
           }}
           onRejectPurchase={(reason) => {
             const err = onRejectPurchase(detail.id, reason)
@@ -558,7 +575,7 @@ function PurchaseDetailDrawer({
 
   const s = summarize(p)
   const supplier = getSupplier(p.supplierId)
-  const lastPayment = p.payments.at(-1)
+  const lastPayment = p.payments?.at(-1)
 
   const steps = [
     {

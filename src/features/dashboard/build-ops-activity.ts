@@ -1,4 +1,5 @@
 import type { ActivityRow } from '@/features/dashboard/dashboard-data'
+import { formatDisplayDate } from '@/lib/display-date'
 import type { CashEntry } from '@/features/keuangan/keuangan-data'
 import { formatIdr } from '@/features/keuangan/keuangan-data'
 import type { Purchase } from '@/features/pembelian/pembelian-data'
@@ -11,15 +12,12 @@ import { summarize as summarizeSale } from '@/features/penjualan/penjualan-data'
 import type { ProductionBatch } from '@/features/produksi/produksi-data'
 
 function formatWhen(iso: string): string {
-  const raw = iso.length === 10 ? `${iso}T12:00:00` : iso
-  const d = new Date(raw)
-  if (Number.isNaN(d.getTime())) return iso
-  return new Intl.DateTimeFormat('id-ID', {
+  return formatDisplayDate(iso, {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(d)
+  })
 }
 
 function sortKey(iso: string): string {

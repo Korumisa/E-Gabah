@@ -4,18 +4,19 @@ export function LoginPreview() {
       <img
         src="/login-sawah.jpg"
         alt="Sawah terasering di Tegallalang, Bali"
+        width={1200}
+        height={1600}
+        fetchPriority="high"
+        decoding="async"
         className="absolute inset-0 h-full w-full object-cover object-center"
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
       <div className="motion-rise relative flex h-full min-h-[560px] flex-col justify-end px-8 py-8 xl:px-10 xl:py-10">
-        <p className="text-[12px] font-medium tracking-wide text-white/75">
+        <p className="font-display text-[2rem] leading-none font-semibold tracking-tight text-white xl:text-[2.35rem]">
           E-Gabah
         </p>
-        <p className="mt-2 max-w-[16rem] text-[26px] leading-[1.2] font-semibold tracking-tight text-white">
-          Satu portal untuk operasi penggilingan.
-        </p>
-        <p className="mt-3 max-w-[18rem] text-[13px] leading-relaxed text-white/80">
-          Pembelian, giling, stok, penjualan, dan kas dalam satu alur.
+        <p className="mt-3 max-w-[18rem] text-[15px] leading-relaxed text-white/85">
+          Operasi mill: beli gabah, giling, stok, jual, dan kas.
         </p>
         <p className="mt-6 text-[11px] text-white/55">
           Sawah Tegallalang · Christophe95 · CC BY-SA 4.0

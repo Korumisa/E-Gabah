@@ -2,8 +2,11 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { TextAreaField } from '@/components/keuangan/FinanceModal'
 import { FinanceToast } from '@/components/keuangan/FinanceToast'
 import { AvatarEditor } from '@/components/settings/AvatarEditor'
+import { ActiveSessionsCard } from '@/components/settings/ActiveSessionsCard'
+import { MfaSettingsCard } from '@/components/settings/MfaSettingsCard'
 import { AlertCard } from '@/components/ui/AlertCard'
 import { StatusPill } from '@/components/keuangan/StatusPill'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { Select } from '@/components/ui/Select'
 import { Switch } from '@/components/ui/Switch'
 import { TextField } from '@/components/ui/TextField'
@@ -11,6 +14,7 @@ import { downloadBackup, restoreBackup } from '@/features/backup/backup'
 import { useAuth } from '@/features/auth/AuthContext'
 import { notifySettingsChanged } from '@/features/settings/app-settings'
 import { pushAppSettings } from '@/features/settings/settings-cloud'
+import { getSupabase, isSupabaseConfigured } from '@/lib/supabase-client'
 import {
   applyTheme,
   type ThemeAccent,
@@ -187,63 +191,94 @@ function saveStored(patch: StoredSettings) {
 
 function BackupDataCard({ notify }: { notify: (msg: string) => void }) {
   const fileRef = useRef<HTMLInputElement>(null)
+  const [pendingPayload, setPendingPayload] = useState<unknown | null>(null)
+  const [pendingName, setPendingName] = useState('')
+
+  function applyRestore(payload: unknown) {
+    const result = restoreBackup(payload)
+    if (!result.ok) {
+      notify(result.error)
+      return
+    }
+    notify('Restore berhasil — memuat ulang…')
+    window.setTimeout(() => window.location.reload(), 600)
+  }
 
   return (
-    <SectionCard
-      title="Backup & restore"
-      description="Unduh/restore seluruh data lokal (JSON) sebelum pindah ke Supabase/Firebase."
-      footer={
-        <div className="flex flex-wrap justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              downloadBackup()
-              notify('Backup JSON diunduh')
-            }}
-            className="h-10 rounded-xl border border-line px-3.5 text-[13px] font-medium text-ink transition hover:bg-surface"
-          >
-            Unduh backup
-          </button>
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="h-10 rounded-xl bg-brand-800 px-3.5 text-[13px] font-semibold text-white transition hover:bg-brand-900"
-          >
-            Restore dari file
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="application/json,.json"
-            className="hidden"
-            onChange={async (e) => {
-              const file = e.target.files?.[0]
-              e.target.value = ''
-              if (!file) return
-              try {
-                const text = await file.text()
-                const parsed = JSON.parse(text) as unknown
-                const result = restoreBackup(parsed)
-                if (!result.ok) {
-                  notify(result.error)
-                  return
+    <>
+      <SectionCard
+        title="Backup & restore"
+        description="Unduh/restore seluruh data lokal (JSON) sebelum pindah ke Supabase/Firebase."
+        footer={
+          <div className="flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                downloadBackup()
+                notify('Backup JSON diunduh')
+              }}
+              className="h-10 rounded-xl border border-line px-3.5 text-[13px] font-medium text-ink transition hover:bg-surface"
+            >
+              Unduh backup
+            </button>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="h-10 rounded-xl bg-brand-800 px-3.5 text-[13px] font-semibold text-white transition hover:bg-brand-900"
+            >
+              Restore dari file
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0]
+                e.target.value = ''
+                if (!file) return
+                try {
+                  const text = await file.text()
+                  const parsed = JSON.parse(text) as unknown
+                  setPendingName(file.name)
+                  setPendingPayload(parsed)
+                } catch {
+                  notify('File JSON tidak bisa dibaca')
                 }
-                notify('Restore berhasil — memuat ulang…')
-                window.setTimeout(() => window.location.reload(), 600)
-              } catch {
-                notify('File JSON tidak bisa dibaca')
-              }
-            }}
-          />
-        </div>
-      }
-    >
-      <p className="text-[13px] leading-relaxed text-muted">
-        Mencakup master, pembelian, penjualan, produksi, persediaan, keuangan,
-        payroll, audit, dan pengaturan. Setelah restore, halaman akan dimuat
-        ulang.
-      </p>
-    </SectionCard>
+              }}
+            />
+          </div>
+        }
+      >
+        <p className="text-[13px] leading-relaxed text-muted">
+          Mencakup master, pembelian, penjualan, produksi, persediaan, keuangan,
+          payroll, audit, dan pengaturan. Setelah restore, halaman akan dimuat
+          ulang.
+        </p>
+      </SectionCard>
+
+      <ConfirmDialog
+        open={pendingPayload !== null}
+        title="Restore backup?"
+        description={
+          pendingName
+            ? `File “${pendingName}” akan menimpa data lokal (pembelian, stok, kas, dll.). Tindakan ini tidak bisa dibatalkan.`
+            : 'Data lokal akan ditimpa. Tindakan ini tidak bisa dibatalkan.'
+        }
+        confirmLabel="Ya, restore"
+        danger
+        onClose={() => {
+          setPendingPayload(null)
+          setPendingName('')
+        }}
+        onConfirm={() => {
+          const payload = pendingPayload
+          setPendingPayload(null)
+          setPendingName('')
+          if (payload != null) applyRestore(payload)
+        }}
+      />
+    </>
   )
 }
 
@@ -500,10 +535,21 @@ export function SettingsPage() {
     prefs: JSON.stringify(prefs) !== JSON.stringify(prefsBase),
     notif: JSON.stringify(notif) !== JSON.stringify(notifBase),
     security:
-      security.twoFactor !== securityBase.twoFactor ||
       security.sessionTimeout !== securityBase.sessionTimeout ||
       security.loginAlert !== securityBase.loginAlert,
   }
+
+  const hasUnsavedChanges = Object.values(dirty).some(Boolean)
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return
+    const onLeave = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onLeave)
+    return () => window.removeEventListener('beforeunload', onLeave)
+  }, [hasUnsavedChanges])
 
   const initials = (profile.name || user?.name || 'U')
     .split(' ')
@@ -614,7 +660,7 @@ export function SettingsPage() {
                   <SaveBar
                     dirty={dirty.profile}
                     onReset={() => setProfile(profileBase)}
-                    onSave={() => {
+                    onSave={async () => {
                       const next = {
                         ...profile,
                         // Field sistem — tidak boleh diubah user
@@ -626,7 +672,7 @@ export function SettingsPage() {
                       }
                       setProfile(next)
                       setProfileBase(next)
-                      return saveStored({ profile: next })
+                      await saveStored({ profile: next })
                       notify('Profil disimpan')
                     }}
                   />
@@ -690,6 +736,9 @@ export function SettingsPage() {
                   <TextField
                     id="set-phone"
                     label="No. WhatsApp / telepon"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     value={profile.phone}
                     onChange={(e) =>
                       setProfile((p) => ({ ...p, phone: e.target.value }))
@@ -757,6 +806,9 @@ export function SettingsPage() {
                   <TextField
                     id="set-em-phone"
                     label="No. telepon"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     value={profile.emergencyPhone}
                     onChange={(e) =>
                       setProfile((p) => ({
@@ -778,9 +830,9 @@ export function SettingsPage() {
                 <SaveBar
                   dirty={dirty.company}
                   onReset={() => setCompany(companyBase)}
-                  onSave={() => {
+                  onSave={async () => {
                     setCompanyBase(company)
-                    return saveStored({ company })
+                    await saveStored({ company })
                     notify('Data perusahaan disimpan')
                   }}
                 />
@@ -889,6 +941,9 @@ export function SettingsPage() {
                 <TextField
                   id="co-phone"
                   label="Telepon kantor"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
                   value={company.phone}
                   onChange={(e) =>
                     setCompany((c) => ({ ...c, phone: e.target.value }))
@@ -898,6 +953,9 @@ export function SettingsPage() {
                   id="co-email"
                   label="Email operasional"
                   type="email"
+                  name="company-email"
+                  autoComplete="email"
+                  spellCheck={false}
                   value={company.email}
                   onChange={(e) =>
                     setCompany((c) => ({ ...c, email: e.target.value }))
@@ -906,6 +964,10 @@ export function SettingsPage() {
                 <TextField
                   id="co-web"
                   label="Website"
+                  type="url"
+                  inputMode="url"
+                  autoComplete="url"
+                  placeholder="https://"
                   value={company.website}
                   onChange={(e) =>
                     setCompany((c) => ({ ...c, website: e.target.value }))
@@ -960,9 +1022,9 @@ export function SettingsPage() {
                 <SaveBar
                   dirty={dirty.finance}
                   onReset={() => setFinance(financeBase)}
-                  onSave={() => {
+                  onSave={async () => {
                     setFinanceBase(finance)
-                    return saveStored({ finance })
+                    await saveStored({ finance })
                     notify('Pengaturan keuangan disimpan')
                   }}
                 />
@@ -1081,9 +1143,9 @@ export function SettingsPage() {
                 <SaveBar
                   dirty={dirty.stock}
                   onReset={() => setStock(stockBase)}
-                  onSave={() => {
+                  onSave={async () => {
                     setStockBase(stock)
-                    return saveStored({ stock })
+                    await saveStored({ stock })
                     notify('Pengaturan persediaan disimpan')
                   }}
                 />
@@ -1184,9 +1246,9 @@ export function SettingsPage() {
                 <SaveBar
                   dirty={dirty.docs}
                   onReset={() => setDocs(docsBase)}
-                  onSave={() => {
+                  onSave={async () => {
                     setDocsBase(docs)
-                    return saveStored({ docs })
+                    await saveStored({ docs })
                     notify('Pengaturan dokumen disimpan')
                   }}
                 />
@@ -1281,10 +1343,10 @@ export function SettingsPage() {
                         accent: prefsBase.accent,
                       })
                     }}
-                    onSave={() => {
+                    onSave={async () => {
                       setPrefsBase(prefs)
-                      return saveStored({ prefs })
                       applyTheme({ mode: prefs.mode, accent: prefs.accent })
+                      await saveStored({ prefs })
                       notify('Preferensi & tema disimpan')
                     }}
                   />
@@ -1435,10 +1497,10 @@ export function SettingsPage() {
                         accent: prefsBase.accent,
                       })
                     }}
-                    onSave={() => {
+                    onSave={async () => {
                       setPrefsBase(prefs)
-                      return saveStored({ prefs })
                       applyTheme({ mode: prefs.mode, accent: prefs.accent })
+                      await saveStored({ prefs })
                       notify('Preferensi disimpan')
                     }}
                   />
@@ -1546,9 +1608,9 @@ export function SettingsPage() {
                 <SaveBar
                   dirty={dirty.notif}
                   onReset={() => setNotif(notifBase)}
-                  onSave={() => {
+                  onSave={async () => {
                     setNotifBase(notif)
-                    return saveStored({ notif })
+                    await saveStored({ notif })
                     notify('Notifikasi disimpan')
                   }}
                 />
@@ -1623,34 +1685,81 @@ export function SettingsPage() {
             <>
               <SectionCard
                 title="Ubah kata sandi"
-                description="Mock lokal — nanti tersambung Supabase Auth."
+                description={
+                  isSupabaseConfigured()
+                    ? 'Mengubah kata sandi akun Supabase Auth Anda.'
+                    : 'Perlu koneksi Supabase. Mode lokal tidak mendukung ganti kata sandi.'
+                }
                 footer={
                   <div className="flex justify-end">
                     <button
                       type="button"
+                      disabled={!isSupabaseConfigured()}
                       onClick={() => {
-                        if (!security.currentPassword.trim()) {
-                          setPasswordError('Isi kata sandi saat ini')
-                          return
-                        }
-                        if (security.newPassword.length < 8) {
-                          setPasswordError('Kata sandi baru minimal 8 karakter')
-                          return
-                        }
-                        if (security.newPassword !== security.confirmPassword) {
-                          setPasswordError('Konfirmasi kata sandi tidak cocok')
-                          return
-                        }
-                        setPasswordError(undefined)
-                        setSecurity((s) => ({
-                          ...s,
-                          currentPassword: '',
-                          newPassword: '',
-                          confirmPassword: '',
-                        }))
-                        notify('Kata sandi diperbarui (demo)')
+                        void (async () => {
+                          if (!security.currentPassword.trim()) {
+                            setPasswordError('Isi kata sandi saat ini')
+                            return
+                          }
+                          if (security.newPassword.length < 8) {
+                            setPasswordError(
+                              'Kata sandi baru minimal 8 karakter',
+                            )
+                            return
+                          }
+                          if (
+                            security.newPassword !== security.confirmPassword
+                          ) {
+                            setPasswordError(
+                              'Konfirmasi kata sandi tidak cocok',
+                            )
+                            return
+                          }
+                          const sb = getSupabase()
+                          const email = (
+                            profile.email ||
+                            user?.email ||
+                            ''
+                          ).trim()
+                          if (!sb || !email) {
+                            setPasswordError(
+                              'Supabase belum dikonfigurasi atau email kosong',
+                            )
+                            return
+                          }
+                          setPasswordError(undefined)
+                          const { error: reauthError } =
+                            await sb.auth.signInWithPassword({
+                              email,
+                              password: security.currentPassword,
+                            })
+                          if (reauthError) {
+                            setPasswordError(
+                              'Kata sandi saat ini tidak cocok',
+                            )
+                            return
+                          }
+                          const { error: updateError } =
+                            await sb.auth.updateUser({
+                              password: security.newPassword,
+                            })
+                          if (updateError) {
+                            setPasswordError(
+                              updateError.message ||
+                                'Gagal memperbarui kata sandi',
+                            )
+                            return
+                          }
+                          setSecurity((s) => ({
+                            ...s,
+                            currentPassword: '',
+                            newPassword: '',
+                            confirmPassword: '',
+                          }))
+                          notify('Kata sandi diperbarui')
+                        })()
                       }}
-                      className="h-10 rounded-xl bg-brand-800 px-3.5 text-[13px] font-semibold text-white transition hover:bg-brand-900"
+                      className="h-10 rounded-xl bg-brand-800 px-3.5 text-[13px] font-semibold text-white transition hover:bg-brand-900 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Perbarui kata sandi
                     </button>
@@ -1702,9 +1811,11 @@ export function SettingsPage() {
                 </div>
               </SectionCard>
 
+              <MfaSettingsCard notify={notify} />
+
               <SectionCard
                 title="Keamanan sesi"
-                description="Verifikasi tambahan dan kontrol timeout."
+                description="Timeout sesi dan preferensi login di perangkat ini."
                 footer={
                   <SaveBar
                     dirty={dirty.security}
@@ -1712,30 +1823,25 @@ export function SettingsPage() {
                       setSecurity((s) => ({
                         ...s,
                         ...securityBase,
+                        twoFactor: false,
                       }))
                     }
                     onSave={() => {
                       const next = {
-                        twoFactor: security.twoFactor,
+                        twoFactor: false,
                         sessionTimeout: security.sessionTimeout,
                         loginAlert: security.loginAlert,
                       }
                       setSecurityBase(next)
-                      return saveStored({ security: next })
-                      notify('Keamanan sesi disimpan')
+                      setSecurity((s) => ({ ...s, twoFactor: false }))
+                      void saveStored({ security: next }).then(() =>
+                        notify('Keamanan sesi disimpan'),
+                      )
                     }}
                   />
                 }
               >
                 <SwitchBlock>
-                  <Switch
-                    id="sec-2fa"
-                    label="Aktifkan verifikasi 2 langkah (OTP email)"
-                    checked={security.twoFactor}
-                    onChange={(twoFactor) =>
-                      setSecurity((s) => ({ ...s, twoFactor }))
-                    }
-                  />
                   <Switch
                     id="sec-login"
                     label="Kirim email saat ada login baru"
@@ -1766,57 +1872,7 @@ export function SettingsPage() {
 
           {tab === 'sesi' ? (
             <>
-              <SectionCard
-                title="Perangkat aktif"
-                description="Sesi yang sedang masuk (data demo)."
-              >
-                <ul className="space-y-2">
-                  {[
-                    {
-                      device: 'Chrome · Windows',
-                      where: 'Klaten',
-                      when: 'Sekarang · perangkat ini',
-                      current: true,
-                    },
-                    {
-                      device: 'Safari · iPhone',
-                      where: 'Solo',
-                      when: '2 hari lalu',
-                      current: false,
-                    },
-                  ].map((row) => (
-                    <li
-                      key={row.device}
-                      className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line/80 bg-surface/60 px-3.5 py-3"
-                    >
-                      <div>
-                        <p className="text-[13px] font-medium text-ink">
-                          {row.device}
-                          {row.current ? (
-                            <span className="ml-2 text-[11px] font-semibold text-brand-700">
-                              Aktif
-                            </span>
-                          ) : null}
-                        </p>
-                        <p className="mt-0.5 text-[12px] text-muted">
-                          {row.where} · {row.when}
-                        </p>
-                      </div>
-                      {!row.current ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            notify(`Sesi ${row.device} diakhiri (demo)`)
-                          }
-                          className="h-9 rounded-xl border border-line px-3 text-[12.5px] font-medium text-ink transition hover:bg-white"
-                        >
-                          Akhiri
-                        </button>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </SectionCard>
+              <ActiveSessionsCard notify={notify} />
 
               <SectionCard
                 title="Keluar akun"

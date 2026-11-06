@@ -6,6 +6,7 @@ import {
 import { readAppSettings } from '@/features/settings/app-settings'
 import type { ApprovalStamp } from '@/features/workflow/approvals'
 import type { ReturnStage } from '@/features/workflow/doc-stages'
+import { parseDisplayDate } from '@/lib/display-date'
 
 export type SaleReturnLine = { sku: string; productName: string; unit: string; qty: number }
 
@@ -212,7 +213,8 @@ export function todayIso(): string {
 }
 
 export function addDays(iso: string, days: number): string {
-  const d = new Date(`${iso}T00:00:00`)
+  const d = parseDisplayDate(iso)
+  if (Number.isNaN(d.getTime())) return iso
   d.setDate(d.getDate() + days)
   return toIso(d)
 }
@@ -452,12 +454,10 @@ export function formatRupiahShort(value: number): string {
   return formatRupiah(value)
 }
 
-export function formatDate(
-  iso: string,
-  opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' },
-): string {
-  return new Intl.DateTimeFormat('id-ID', opts).format(new Date(`${iso}T00:00:00`))
-}
+export {
+  parseDisplayDate,
+  formatDisplayDate as formatDate,
+} from '@/lib/display-date'
 
 export function parseNumber(value: string): number {
   const cleaned = value.trim().replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.')

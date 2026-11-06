@@ -27,6 +27,7 @@ import {
 import { EyeIcon } from '@/components/ui/icons'
 import { Select } from '@/components/ui/Select'
 import { TextField } from '@/components/ui/TextField'
+import { formatDisplayDate } from '@/lib/display-date'
 import { buildEfakturCsv } from '@/features/keuangan/tax-csv'
 import type {
   PpnRate,
@@ -85,13 +86,11 @@ const MODE_OPTS = [
 ]
 
 function formatInvoiceDate(iso: string): string {
-  const d = new Date(`${iso}T12:00:00`)
-  if (Number.isNaN(d.getTime())) return iso
-  return new Intl.DateTimeFormat('id-ID', {
+  return formatDisplayDate(iso, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(d)
+  })
 }
 
 function todayYmd(): string {

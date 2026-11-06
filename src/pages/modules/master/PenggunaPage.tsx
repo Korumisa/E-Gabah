@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { FinanceFilterBar } from '@/components/keuangan/FinanceFilterBar'
 import {
   FinanceModal,
@@ -8,6 +9,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -21,7 +24,10 @@ import {
 } from '@/components/keuangan/FinanceTable'
 import { FinanceToast } from '@/components/keuangan/FinanceToast'
 import { AlertCard } from '@/components/ui/AlertCard'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { StatusPill } from '@/components/keuangan/StatusPill'
+import { adminRevokeUserSessions } from '@/features/auth/sessions'
+import { isSupabaseConfigured } from '@/lib/supabase-client'
 import { printBukti } from '@/components/keuangan/print-bukti'
 import {
   DetailDrawer,
@@ -43,6 +49,11 @@ import {
   validateUserForm,
   type UserFieldErrors,
 } from '@/features/master/input-safety'
+import {
+  readOrgStructure,
+  subscribeOrgStructure,
+  type OrgStructure,
+} from '@/features/master/org-structure'
 import { useMasterStore } from '@/features/master/master-store'
 import { usePageSize } from '@/features/settings/usePageSize'
 import { ROLE_LABELS, type UserRole } from '@/types/auth'
@@ -56,18 +67,12 @@ const ROLE_OPTIONS = (Object.keys(ROLE_LABELS) as UserRole[]).map((value) => ({
   label: ROLE_LABELS[value],
 }))
 
-const ADD_OPTION = '__add__'
-
-function uniqueLabels(current: string, ...groups: string[][]): string[] {
-  const values = new Set<string>()
-  for (const group of groups) {
-    for (const item of group) {
-      const text = item.trim()
-      if (text) values.add(text)
-    }
-  }
-  if (current.trim() && current !== ADD_OPTION) values.add(current.trim())
-  return [...values].sort((a, b) => a.localeCompare(b, 'id'))
+function selectOptions(choices: string[], current: string) {
+  const values = new Set(choices.map((c) => c.trim()).filter(Boolean))
+  if (current.trim()) values.add(current.trim())
+  return [...values]
+    .sort((a, b) => a.localeCompare(b, 'id'))
+    .map((value) => ({ value, label: value }))
 }
 
 type FormState = {
@@ -82,17 +87,24 @@ type FormState = {
   password: string
 }
 
-const emptyForm = (): FormState => ({
-  name: '',
-  email: '',
-  role: 'pembelian',
-  title: ROLE_LABELS.pembelian,
-  phone: '',
-  branch: 'Mill Klaten',
-  department: ROLE_LABELS.pembelian,
-  active: true,
-  password: '',
-})
+function emptyForm(org: OrgStructure = readOrgStructure()): FormState {
+  const role: UserRole = 'pembelian'
+  return {
+    name: '',
+    email: '',
+    role,
+    title: org.titles.includes(ROLE_LABELS[role])
+      ? ROLE_LABELS[role]
+      : (org.titles[0] ?? ROLE_LABELS[role]),
+    phone: '',
+    branch: org.branches[0] ?? 'Mill Klaten',
+    department: org.departments.includes(ROLE_LABELS[role])
+      ? ROLE_LABELS[role]
+      : (org.departments[0] ?? ROLE_LABELS[role]),
+    active: true,
+    password: '',
+  }
+}
 
 export function PenggunaPage() {
   const {
@@ -105,6 +117,7 @@ export function PenggunaPage() {
   } = useMasterStore()
   const PAGE_SIZE = usePageSize()
 
+  const [org, setOrg] = useState<OrgStructure>(() => readOrgStructure())
   const [search, setSearch] = useState('')
   const [role, setRole] = useState<RoleFilter>('all')
   const [status, setStatus] = useState<StatusFilter>('all')
@@ -116,12 +129,17 @@ export function PenggunaPage() {
   const [detail, setDetail] = useState<MasterUser | null>(null)
   const [editing, setEditing] = useState<MasterUser | null>(null)
   const [formOpen, setFormOpen] = useState(false)
-  const [form, setForm] = useState(emptyForm)
+  const [form, setForm] = useState(() => emptyForm())
   const [formErrors, setFormErrors] = useState<UserFieldErrors>({})
   const [toast, setToast] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [revokeSessionsFor, setRevokeSessionsFor] = useState<MasterUser | null>(
+    null,
+  )
 
   const stats = useMemo(() => buildPenggunaStats(users), [users])
+
+  useEffect(() => subscribeOrgStructure(() => setOrg(readOrgStructure())), [])
 
   useEffect(() => {
     if (!toast) return
@@ -167,7 +185,7 @@ export function PenggunaPage() {
 
   function openCreate() {
     setEditing(null)
-    setForm(emptyForm())
+    setForm(emptyForm(org))
     setFormErrors({})
     setFormOpen(true)
   }
@@ -276,16 +294,25 @@ export function PenggunaPage() {
               Pengguna & peran
             </h2>
             <p className="mt-0.5 text-[12.5px] text-muted">
-              Admin membuat akun login beserta cabang. Peran dan lokasi tersimpan di database.
+              Admin membuat akun login beserta cabang. Opsi jabatan, departemen,
+              dan lokasi dikelola di Organisasi.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={openCreate}
-            className="h-10 rounded-xl bg-brand-800 px-3.5 text-[13px] font-semibold text-white transition hover:bg-brand-900"
-          >
-            + Pengguna
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to="/app/master-data/organisasi"
+              className="inline-flex h-10 items-center rounded-xl border border-line px-3.5 text-[13px] font-medium text-ink transition hover:bg-brand-50"
+            >
+              Organisasi & lokasi
+            </Link>
+            <button
+              type="button"
+              onClick={openCreate}
+              className="h-10 rounded-xl bg-brand-800 px-3.5 text-[13px] font-semibold text-white transition hover:bg-brand-900"
+            >
+              + Pengguna
+            </button>
+          </div>
         </div>
 
         <FinanceFilterBar
@@ -309,7 +336,34 @@ export function PenggunaPage() {
           onSecondaryFilterChange={setStatus}
         />
 
-        <FinanceTable>
+        <FinanceTable
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada data." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.name}
+                  subtitle={row.department}
+                  badges={
+                    <StatusPill
+                      label={row.active ? 'Aktif' : 'Nonaktif'}
+                      tone={row.active ? 'good' : 'muted'}
+                    />
+                  }
+                  facts={[
+                    { label: 'Peran', value: ROLE_LABELS[row.role] },
+                    { label: 'Cabang', value: row.branch },
+                    { label: 'Email', value: row.email },
+                    { label: 'Telepon', value: row.phone || '—' },
+                  ]}
+                  onClick={() => setDetail(row)}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-10">#</FinanceTh>
             <FinanceSortTh
@@ -447,6 +501,15 @@ export function PenggunaPage() {
               >
                 {detail.active ? 'Nonaktifkan' : 'Aktifkan'}
               </button>
+              {isSupabaseConfigured() ? (
+                <button
+                  type="button"
+                  onClick={() => setRevokeSessionsFor(detail)}
+                  className="h-11 w-full rounded-xl border border-line text-[14px] font-medium text-ink transition hover:bg-surface"
+                >
+                  Putuskan semua sesi
+                </button>
+              ) : null}
               {detail.role !== 'admin' ? (
                 <button
                   type="button"
@@ -528,57 +591,76 @@ export function PenggunaPage() {
               label="Peran"
               value={form.role}
               options={ROLE_OPTIONS}
-              onChange={(role) =>
-                setForm((f) => ({
-                  ...f,
-                  role,
-                  title:
-                    f.title === ROLE_LABELS[f.role]
-                      ? ROLE_LABELS[role]
-                      : f.title,
-                  department:
-                    f.department === ROLE_LABELS[f.role]
-                      ? ROLE_LABELS[role]
-                      : f.department,
-                }))
+              onChange={(nextRole) =>
+                setForm((f) => {
+                  const label = ROLE_LABELS[nextRole]
+                  const nextTitle = org.titles.includes(label)
+                    ? label
+                    : f.title === ROLE_LABELS[f.role]
+                      ? (org.titles[0] ?? f.title)
+                      : f.title
+                  const nextDept = org.departments.includes(label)
+                    ? label
+                    : f.department === ROLE_LABELS[f.role]
+                      ? (org.departments[0] ?? f.department)
+                      : f.department
+                  return {
+                    ...f,
+                    role: nextRole,
+                    title: nextTitle,
+                    department: nextDept,
+                  }
+                })
               }
             />
-            <AddableSelect
-              id="usr-title"
-              label="Jabatan"
-              value={form.title}
-              choices={uniqueLabels(
-                form.title,
-                users.map((u) => u.title),
-                Object.values(ROLE_LABELS),
-              )}
-              error={formErrors.title}
-              onChange={(title) => patchForm('title', title)}
-            />
-            <AddableSelect
-              id="usr-dept"
-              label="Departemen"
-              value={form.department}
-              choices={uniqueLabels(
-                form.department,
-                users.map((u) => u.department),
-                Object.values(ROLE_LABELS),
-              )}
-              error={formErrors.department}
-              onChange={(department) => patchForm('department', department)}
-            />
-            <AddableSelect
-              id="usr-branch"
-              label="Cabang / lokasi"
-              value={form.branch}
-              choices={uniqueLabels(
-                form.branch,
-                users.map((u) => u.branch),
-                ['Mill Klaten', 'Kantor Pusat'],
-              )}
-              error={formErrors.branch}
-              onChange={(branch) => patchForm('branch', branch)}
-            />
+            <div className="space-y-1">
+              <Select
+                id="usr-title"
+                label="Jabatan"
+                value={form.title}
+                options={selectOptions(org.titles, form.title)}
+                onChange={(title) => patchForm('title', title)}
+              />
+              {formErrors.title ? (
+                <p className="text-[11px] text-red-700">{formErrors.title}</p>
+              ) : null}
+            </div>
+            <div className="space-y-1">
+              <Select
+                id="usr-dept"
+                label="Departemen"
+                value={form.department}
+                options={selectOptions(org.departments, form.department)}
+                onChange={(department) => patchForm('department', department)}
+              />
+              {formErrors.department ? (
+                <p className="text-[11px] text-red-700">
+                  {formErrors.department}
+                </p>
+              ) : null}
+            </div>
+            <div className="space-y-1">
+              <Select
+                id="usr-branch"
+                label="Cabang / lokasi"
+                value={form.branch}
+                options={selectOptions(org.branches, form.branch)}
+                onChange={(branch) => patchForm('branch', branch)}
+              />
+              {formErrors.branch ? (
+                <p className="text-[11px] text-red-700">{formErrors.branch}</p>
+              ) : null}
+            </div>
+            <p className="sm:col-span-2 text-[12px] text-muted">
+              Opsi jabatan, departemen, dan cabang dikelola di{' '}
+              <Link
+                to="/app/master-data/organisasi"
+                className="font-medium text-brand-800 underline-offset-2 hover:underline"
+              >
+                Organisasi & lokasi
+              </Link>
+              .
+            </p>
             {editing ? null : (
               <TextField
                 id="usr-password"
@@ -614,60 +696,31 @@ export function PenggunaPage() {
           </div>
         </FinanceModal>
       ) : null}
-    </div>
-  )
-}
 
-function AddableSelect({
-  id,
-  label,
-  value,
-  choices,
-  error,
-  onChange,
-}: {
-  id: string
-  label: string
-  value: string
-  choices: string[]
-  error?: string
-  onChange: (value: string) => void
-}) {
-  const [adding, setAdding] = useState(
-    () => value.trim().length > 0 && !choices.includes(value),
-  )
-  const options = [
-    ...choices.map((item) => ({ value: item, label: item })),
-    { value: ADD_OPTION, label: 'Tambah baru…' },
-  ]
-  return (
-    <div className="space-y-2">
-      <Select
-        label={label}
-        value={adding ? ADD_OPTION : value}
-        options={options}
-        onChange={(next) => {
-          if (next === ADD_OPTION) {
-            setAdding(true)
-            onChange('')
-            return
-          }
-          setAdding(false)
-          onChange(next)
+      <ConfirmDialog
+        open={revokeSessionsFor !== null}
+        title="Putuskan semua sesi?"
+        description={
+          revokeSessionsFor
+            ? `Semua perangkat login untuk ${revokeSessionsFor.name} akan dipaksa keluar (kecuali sesi Anda saat ini jika itu akun yang sama).`
+            : undefined
+        }
+        confirmLabel="Ya, putuskan"
+        danger
+        onClose={() => setRevokeSessionsFor(null)}
+        onConfirm={() => {
+          const target = revokeSessionsFor
+          setRevokeSessionsFor(null)
+          if (!target) return
+          void adminRevokeUserSessions(target.id)
+            .then((n) => setToast(`Sesi diputus (${n})`))
+            .catch((err) =>
+              setToast(
+                err instanceof Error ? err.message : 'Gagal memutus sesi',
+              ),
+            )
         }}
       />
-      {adding ? (
-        <TextField
-          id={id}
-          label={`Nama ${label.toLowerCase()}`}
-          requiredMark
-          value={value}
-          placeholder="Ketik nama baru"
-          maxLength={80}
-          error={error}
-          onChange={(e) => onChange(sanitizeText(e.target.value, 80))}
-        />
-      ) : null}
     </div>
   )
 }

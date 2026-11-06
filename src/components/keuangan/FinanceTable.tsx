@@ -42,24 +42,111 @@ export function sortBy<T, K extends string>(
 export function FinanceTable({
   minWidth,
   children,
+  mobileCards,
 }: {
   /** Jika diisi, tabel bisa scroll horizontal. Tanpa ini tabel fluid 100%. */
   minWidth?: string
   children: ReactNode
+  /**
+   * Konten daftar untuk layar sempit. Jika diisi: card tampil di < md,
+   * tabel hanya ≥ md.
+   */
+  mobileCards?: ReactNode
 }) {
+  const responsive = mobileCards !== undefined
   return (
-    <div
-      className={[
-        'rounded-2xl border border-line/90 bg-panel',
-        minWidth ? 'overflow-x-auto' : 'overflow-hidden',
-      ].join(' ')}
-    >
-      <table
-        className="w-full border-collapse text-left text-[13px] [&_th]:px-3.5 [&_th]:py-3 [&_td]:px-3.5 [&_td]:py-3"
-        style={minWidth ? { minWidth } : undefined}
+    <>
+      {responsive ? (
+        <div className="space-y-2 md:hidden">{mobileCards}</div>
+      ) : null}
+      <div
+        className={[
+          'rounded-2xl border border-line/90 bg-panel',
+          minWidth ? 'overflow-x-auto' : 'overflow-hidden',
+          responsive ? 'hidden md:block' : '',
+        ].join(' ')}
       >
-        {children}
-      </table>
+        <table
+          className="w-full border-collapse text-left text-[13px] [&_th]:px-3.5 [&_th]:py-3 [&_td]:px-3.5 [&_td]:py-3"
+          style={minWidth ? { minWidth } : undefined}
+        >
+          {children}
+        </table>
+      </div>
+    </>
+  )
+}
+
+/** Kartu baris untuk daftar mobile (pasangan FinanceTable.mobileCards). */
+export function FinanceListCard({
+  title,
+  subtitle,
+  badges,
+  facts,
+  action,
+  onClick,
+}: {
+  title: ReactNode
+  subtitle?: ReactNode
+  badges?: ReactNode
+  facts?: { label: string; value: ReactNode }[]
+  action?: ReactNode
+  onClick?: () => void
+}) {
+  const interactive = Boolean(onClick)
+  const className = [
+    'w-full rounded-2xl border border-line/90 bg-panel px-3.5 py-3 text-left transition',
+    interactive ? 'hover:border-brand-200 hover:bg-brand-50/40 active:bg-brand-50/70' : '',
+  ].join(' ')
+
+  const body = (
+    <>
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="min-w-0 truncate text-[14px] font-semibold text-ink">
+              {title}
+            </p>
+            {badges}
+          </div>
+          {subtitle ? (
+            <p className="mt-0.5 truncate text-[12px] text-muted">{subtitle}</p>
+          ) : null}
+        </div>
+        {action ? <div className="shrink-0">{action}</div> : null}
+      </div>
+      {facts && facts.length > 0 ? (
+        <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t border-line/70 pt-2.5">
+          {facts.map((fact) => (
+            <div key={fact.label} className="min-w-0">
+              <dt className="text-[10px] font-medium tracking-wide text-muted uppercase">
+                {fact.label}
+              </dt>
+              <dd className="mt-0.5 truncate text-[12.5px] text-ink">
+                {fact.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+    </>
+  )
+
+  if (interactive) {
+    return (
+      <button type="button" onClick={onClick} className={className}>
+        {body}
+      </button>
+    )
+  }
+
+  return <div className={className}>{body}</div>
+}
+
+export function FinanceListEmpty({ message }: { message: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-line bg-panel px-4 py-10 text-center">
+      <p className="text-[13px] text-muted">{message}</p>
     </div>
   )
 }

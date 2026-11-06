@@ -446,6 +446,10 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
 
   const voidRun = useCallback(
     (id: string): string | undefined => {
+      const role = user?.role
+      if (role !== 'keuangan' && role !== 'admin') {
+        return 'Hanya keuangan atau admin yang bisa void payroll'
+      }
       const current = runs.find((r) => r.id === id)
       if (!current || current.status === 'void') return undefined
       const locked = assertPeriodOpen(todayIsoDate())
@@ -476,7 +480,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
       })
       return undefined
     },
-    [runs, addCashEntry, reverseJournalEntry, appendAudit],
+    [runs, user?.role, addCashEntry, reverseJournalEntry, appendAudit],
   )
 
   const deleteRun = useCallback(

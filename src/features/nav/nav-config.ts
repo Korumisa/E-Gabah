@@ -283,6 +283,12 @@ export const NAV_GROUPS: NavGroup[] = [
         roles: ['admin'],
       },
       {
+        id: 'master-organisasi',
+        label: 'Organisasi & Lokasi',
+        path: '/app/master-data/organisasi',
+        roles: ['admin'],
+      },
+      {
         id: 'audit',
         label: 'Audit Log',
         path: '/app/audit',

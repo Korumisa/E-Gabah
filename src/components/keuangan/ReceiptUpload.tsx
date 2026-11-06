@@ -65,10 +65,7 @@ export function ReceiptUpload({
 
   async function applyFile(file: File | undefined) {
     if (!file) return
-    const okType =
-      ACCEPT.split(',').includes(file.type) ||
-      file.type.startsWith('image/') ||
-      file.type === 'application/pdf'
+    const okType = ACCEPT.split(',').includes(file.type)
     if (!okType) {
       onChange(null)
       setUploadError('Tipe file tidak didukung.')

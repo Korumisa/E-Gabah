@@ -246,6 +246,7 @@ export function ReturPage() {
 
   return (
     <div className="space-y-2.5">
+      {toast ? <FinanceToast message={toast} /> : null}
       <FinanceStatGrid stats={stats} />
 
       <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
@@ -256,7 +257,6 @@ export function ReturPage() {
               Kembalikan barang dari pelanggan. Posting menambah stok dan menyesuaikan piutang.
             </p>
           </div>
-          <FinanceToast message={toast} />
         </div>
 
         <FinanceFilterBar

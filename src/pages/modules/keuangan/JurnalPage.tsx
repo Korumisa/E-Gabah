@@ -28,6 +28,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { EyeIcon } from '@/components/ui/icons'
 import { Select } from '@/components/ui/Select'
 import { TextField } from '@/components/ui/TextField'
+import { formatDisplayDate } from '@/lib/display-date'
 import { useFinanceStore } from '@/features/keuangan/finance-store'
 import {
   type Account,
@@ -91,13 +92,11 @@ function todayIsoDate(): string {
 }
 
 function formatJournalDate(iso: string): string {
-  const d = new Date(`${iso}T12:00:00`)
-  if (Number.isNaN(d.getTime())) return iso
-  return new Intl.DateTimeFormat('id-ID', {
+  return formatDisplayDate(iso, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(d)
+  })
 }
 
 function accountLabel(accounts: Account[], id: string): string {

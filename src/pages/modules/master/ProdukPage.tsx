@@ -9,6 +9,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -284,7 +286,40 @@ export function ProdukPage() {
           onSecondaryFilterChange={setStatus}
         />
 
-        <FinanceTable>
+        <FinanceTable
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada data." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.name}
+                  subtitle={row.barcode ? `${row.sku} · ${row.barcode}` : row.sku}
+                  badges={
+                    <StatusPill
+                      label={row.active ? 'Aktif' : 'Nonaktif'}
+                      tone={row.active ? 'good' : 'muted'}
+                    />
+                  }
+                  facts={[
+                    {
+                      label: 'Kategori',
+                      value: PRODUCT_CATEGORY_LABEL[row.category],
+                    },
+                    { label: 'Satuan', value: row.unit },
+                    {
+                      label: 'Harga jual',
+                      value: formatIdr(row.defaultPrice),
+                    },
+                    { label: 'SKU', value: row.sku },
+                  ]}
+                  onClick={() => setDetail(row)}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-10">#</FinanceTh>
             <FinanceSortTh

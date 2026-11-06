@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { AppSidebar } from '@/components/layout/AppSidebar'
 import { AppTopbar } from '@/components/layout/AppTopbar'
+import { ModuleErrorBoundary } from '@/components/ui/ModuleErrorBoundary'
 
 type AppShellProps = {
   title: string
@@ -44,7 +45,11 @@ export function AppShell({ title, subtitle }: AppShellProps) {
           </header>
           <div className="scrollbar-none min-h-0 flex-1 overflow-y-auto pb-6">
             <div key={location.pathname} className="motion-page">
-              <Outlet />
+              <ModuleErrorBoundary
+                resetKey={`${location.pathname}${location.search}`}
+              >
+                <Outlet />
+              </ModuleErrorBoundary>
             </div>
           </div>
         </main>

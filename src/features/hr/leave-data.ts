@@ -110,14 +110,24 @@ export function usedCutiDays(
     .reduce((s, r) => s + r.days, 0)
 }
 
+function isHttpUrl(url: string | undefined): url is string {
+  if (!url) return false
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return url.startsWith('https://') || url.startsWith('http://')
+  }
+}
+
 export function proofPreviewUrl(
   proof: ProofAttachment | string | undefined,
 ): string | undefined {
   if (!proof) return undefined
   if (typeof proof === 'string') {
-    return proof.startsWith('http') ? proof : undefined
+    return isHttpUrl(proof) ? proof : undefined
   }
-  return proof.previewUrl
+  return isHttpUrl(proof.previewUrl) ? proof.previewUrl : undefined
 }
 
 export function proofDisplayName(

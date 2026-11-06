@@ -12,8 +12,23 @@ export function RequireAnyRole({
   roles,
   fallback = '/portal',
 }: RequireAnyRoleProps) {
-  const { user } = useAuth()
-  if (!user) return null
+  const { user, authReady } = useAuth()
+
+  if (!authReady) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <span
+          className="size-8 animate-spin rounded-full border-2 border-brand-200 border-t-brand-800"
+          aria-hidden
+        />
+        <span className="sr-only">Memuat otorisasi…</span>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
   if (!roles.includes(user.role)) {
     return <Navigate to={fallback} replace />
   }

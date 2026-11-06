@@ -4,6 +4,7 @@ import { readAppSettings } from '@/features/settings/app-settings'
 import type { ApprovalStamp } from '@/features/workflow/approvals'
 import type { ReturnStage } from '@/features/workflow/doc-stages'
 import type { ProofAttachment } from '@/features/workflow/proof'
+import { parseDisplayDate } from '@/lib/display-date'
 
 export type PurchaseReturnLine = { sku: string; productName: string; unit: string; qty: number }
 
@@ -251,7 +252,8 @@ export function todayIso(): string {
 }
 
 export function addDays(iso: string, days: number): string {
-  const d = new Date(`${iso}T00:00:00`)
+  const d = parseDisplayDate(iso)
+  if (Number.isNaN(d.getTime())) return iso
   d.setDate(d.getDate() + days)
   return toIso(d)
 }
@@ -346,7 +348,7 @@ export function summarize(p: Purchase, today = todayIso()): PurchaseSummary {
   const received = isPurchaseReceivedForAp(p.stage)
   const pretax = received && weighing ? weighing.netto * unitPrice : 0
   const total = p.totalWithTax ?? pretax
-  const paid = p.payments.reduce((sum, pay) => sum + pay.amount, 0)
+  const paid = (p.payments ?? []).reduce((sum, pay) => sum + pay.amount, 0)
   const outstanding = Math.max(0, total - paid)
 
   let payment: PaymentStatus | null = null
@@ -465,12 +467,10 @@ export function formatPercent(value: number): string {
   return `${value.toFixed(1).replace('.', ',')}%`
 }
 
-export function formatDate(
-  iso: string,
-  opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' },
-): string {
-  return new Intl.DateTimeFormat('id-ID', opts).format(new Date(`${iso}T00:00:00`))
-}
+export {
+  parseDisplayDate,
+  formatDisplayDate as formatDate,
+} from '@/lib/display-date'
 
 export function parseNumber(value: string): number {
   // Terima "1.250" (ribuan) maupun "26,5" (desimal)

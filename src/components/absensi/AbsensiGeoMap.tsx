@@ -2,20 +2,10 @@ import { useEffect, useMemo, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { PageSection } from '@/components/ui/PageSection'
-import {
-  formatClock,
-  hasGeo,
-  type AttendanceRecord,
-} from '@/features/absensi/absensi-data'
+import type { AbsensiMapPin } from '@/components/absensi/absensi-map-pins'
 
-export type AbsensiMapPin = {
-  id: string
-  lat: number
-  lng: number
-  label: string
-  sublabel?: string
-  kind: 'in' | 'out'
-}
+export type { AbsensiMapPin } from '@/components/absensi/absensi-map-pins'
+export { pinsFromRecords } from '@/components/absensi/absensi-map-pins'
 
 type AbsensiGeoMapProps = {
   title: string
@@ -41,37 +31,6 @@ function pinIcon(kind: 'in' | 'out') {
     iconAnchor: [14, 36],
     popupAnchor: [0, -32],
   })
-}
-
-export function pinsFromRecords(
-  records: AttendanceRecord[],
-  opts?: { userId?: string },
-): AbsensiMapPin[] {
-  const pins: AbsensiMapPin[] = []
-  for (const r of records) {
-    if (opts?.userId && r.userId !== opts.userId) continue
-    if (hasGeo(r.checkInGeo)) {
-      pins.push({
-        id: `${r.id}-in`,
-        lat: r.checkInGeo!.lat,
-        lng: r.checkInGeo!.lng,
-        label: r.userName,
-        sublabel: `Masuk ${r.date} · ${formatClock(r.checkIn)}`,
-        kind: 'in',
-      })
-    }
-    if (hasGeo(r.checkOutGeo)) {
-      pins.push({
-        id: `${r.id}-out`,
-        lat: r.checkOutGeo!.lat,
-        lng: r.checkOutGeo!.lng,
-        label: r.userName,
-        sublabel: `Keluar ${r.date} · ${formatClock(r.checkOut)}`,
-        kind: 'out',
-      })
-    }
-  }
-  return pins
 }
 
 export function AbsensiGeoMap({

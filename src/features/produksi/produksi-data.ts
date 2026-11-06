@@ -1,5 +1,6 @@
 import { LOCATIONS } from '@/features/persediaan/persediaan-data'
 import type { MetricCardData } from '@/features/dashboard/dashboard-data'
+import { formatDisplayDate } from '@/lib/display-date'
 
 export type BatchStage =
   | 'draft'
@@ -122,14 +123,11 @@ export function todayIso(d = new Date()): string {
 }
 
 export function formatDate(iso: string): string {
-  if (!iso) return ','
-  const d = new Date(`${iso}T00:00:00`)
-  if (Number.isNaN(d.getTime())) return iso
-  return new Intl.DateTimeFormat('id-ID', {
+  return formatDisplayDate(iso, {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
-  }).format(d)
+  })
 }
 
 export function formatQty(value: number, unit = 'kg'): string {

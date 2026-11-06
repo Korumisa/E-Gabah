@@ -128,5 +128,8 @@ export function computeRequiredRoles(src: ImpactSources): UnlockImpactRole[] {
 
   if (financeHit) roles.add('keuangan')
 
+  // Cloud INSERT rejects empty required_roles — always need ≥1 ops approver.
+  if (roles.size === 0) roles.add('keuangan')
+
   return [...roles]
 }

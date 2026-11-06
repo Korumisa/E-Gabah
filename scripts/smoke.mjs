@@ -56,6 +56,12 @@ const migration = fs.existsSync(
 if (settingsCloud && migration) pass('pengaturan dan akun cabang ada di kode')
 else fail('pengaturan dan akun cabang ada di kode')
 
+const securityHardening = fs.existsSync(
+  path.join(root, 'supabase/migrations/20261105_14_security_hardening.sql'),
+)
+if (securityHardening) pass('migrasi security hardening 14 ada')
+else fail('migrasi security hardening 14 ada')
+
 function loadDatabaseUrl() {
   const envFile = path.join(root, '.env.local')
   if (!fs.existsSync(envFile)) return null

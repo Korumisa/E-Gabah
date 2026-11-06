@@ -1,3 +1,4 @@
+import { lazy, Suspense, type ComponentType, type ReactNode } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthenticatedProviders } from '@/app/AuthenticatedProviders'
 import { RequireAnyRole } from '@/app/RequireAnyRole'
@@ -7,53 +8,200 @@ import { AppShell } from '@/components/layout/AppShell'
 import { ModuleShell } from '@/components/layout/ModuleShell'
 import { PortalNavbar } from '@/components/layout/PortalNavbar'
 import { LoginPage } from '@/pages/LoginPage'
-import { PortalPage } from '@/pages/PortalPage'
-import { SettingsPage } from '@/pages/SettingsPage'
-import { DashboardPage } from '@/pages/modules/DashboardPage'
-import { InboxPage } from '@/pages/modules/InboxPage'
-import { AuditPage } from '@/pages/modules/AuditPage'
-import { AccountMapPage } from '@/pages/modules/keuangan/AccountMapPage'
-import { BiayaPage } from '@/pages/modules/keuangan/BiayaPage'
-import { CoaPage } from '@/pages/modules/keuangan/CoaPage'
-import { EFakturPage } from '@/pages/modules/keuangan/EFakturPage'
-import { PeriodePage } from '@/pages/modules/keuangan/PeriodePage'
-import { RekonBankPage } from '@/pages/modules/keuangan/RekonBankPage'
-import { JurnalPage } from '@/pages/modules/keuangan/JurnalPage'
-import { KasPage } from '@/pages/modules/keuangan/KasPage'
-import { PayrollPage } from '@/pages/modules/keuangan/PayrollPage'
-import { PiutangPage } from '@/pages/modules/keuangan/PiutangPage'
-import { UtangPage } from '@/pages/modules/keuangan/UtangPage'
-import { LaporanPage } from '@/pages/modules/LaporanPage'
-import { AbsensiPage } from '@/pages/modules/sdm/AbsensiPage'
-import { AbsensiCutiPage } from '@/pages/modules/sdm/AbsensiCutiPage'
-import { AbsensiRekapPage } from '@/pages/modules/sdm/AbsensiRekapPage'
-import { HrHomePage } from '@/pages/modules/hr/HrHomePage'
-import { HrKaryawanPage } from '@/pages/modules/hr/HrKaryawanPage'
-import { HrPayrollPage } from '@/pages/modules/hr/HrPayrollPage'
-import { HrPersetujuanPage } from '@/pages/modules/hr/HrPersetujuanPage'
 
-import { KoreksiPage } from '@/pages/modules/persediaan/KoreksiPage'
-import { MutasiPage } from '@/pages/modules/persediaan/MutasiPage'
-import { SaldoPage } from '@/pages/modules/persediaan/SaldoPage'
-import { MitraPage } from '@/pages/modules/master/MitraPage'
-import { PenggunaPage } from '@/pages/modules/master/PenggunaPage'
-import { ProdukPage } from '@/pages/modules/master/ProdukPage'
-import { PembelianPage } from '@/pages/modules/PembelianPage'
-import { PembayaranPage } from '@/pages/modules/pembelian/PembayaranPage'
-import { PencatatanPage } from '@/pages/modules/pembelian/PencatatanPage'
-import { PenerimaanPage } from '@/pages/modules/pembelian/PenerimaanPage'
-import { QcPage } from '@/pages/modules/pembelian/QcPage'
-import { ReturPage } from '@/pages/modules/pembelian/ReturPage'
-import { PenjualanPage } from '@/pages/modules/PenjualanPage'
-import { OrderPage } from '@/pages/modules/penjualan/OrderPage'
-import { PengirimanPage } from '@/pages/modules/penjualan/PengirimanPage'
-import { TagihanPage } from '@/pages/modules/penjualan/TagihanPage'
-import { ReturPage as PenjualanReturPage } from '@/pages/modules/penjualan/ReturPage'
-import { ProduksiPage } from '@/pages/modules/ProduksiPage'
-import { BatchPage } from '@/pages/modules/produksi/BatchPage'
-import { InputOutputPage } from '@/pages/modules/produksi/InputOutputPage'
-import { PackingPage } from '@/pages/modules/produksi/PackingPage'
-import { RendemenPage } from '@/pages/modules/produksi/RendemenPage'
+function lazyPage<T extends ComponentType>(
+  loader: () => Promise<{ [K in string]: T }>,
+  exportName: keyof Awaited<ReturnType<typeof loader>> & string,
+) {
+  return lazy(async () => {
+    const mod = await loader()
+    return { default: mod[exportName] as T }
+  })
+}
+
+const PortalPage = lazyPage(() => import('@/pages/PortalPage'), 'PortalPage')
+const SettingsPage = lazyPage(() => import('@/pages/SettingsPage'), 'SettingsPage')
+const DashboardPage = lazyPage(
+  () => import('@/pages/modules/DashboardPage'),
+  'DashboardPage',
+)
+const InboxPage = lazyPage(() => import('@/pages/modules/InboxPage'), 'InboxPage')
+const AuditPage = lazyPage(() => import('@/pages/modules/AuditPage'), 'AuditPage')
+const AccountMapPage = lazyPage(
+  () => import('@/pages/modules/keuangan/AccountMapPage'),
+  'AccountMapPage',
+)
+const BiayaPage = lazyPage(
+  () => import('@/pages/modules/keuangan/BiayaPage'),
+  'BiayaPage',
+)
+const CoaPage = lazyPage(() => import('@/pages/modules/keuangan/CoaPage'), 'CoaPage')
+const EFakturPage = lazyPage(
+  () => import('@/pages/modules/keuangan/EFakturPage'),
+  'EFakturPage',
+)
+const PeriodePage = lazyPage(
+  () => import('@/pages/modules/keuangan/PeriodePage'),
+  'PeriodePage',
+)
+const RekonBankPage = lazyPage(
+  () => import('@/pages/modules/keuangan/RekonBankPage'),
+  'RekonBankPage',
+)
+const JurnalPage = lazyPage(
+  () => import('@/pages/modules/keuangan/JurnalPage'),
+  'JurnalPage',
+)
+const KasPage = lazyPage(() => import('@/pages/modules/keuangan/KasPage'), 'KasPage')
+const PayrollPage = lazyPage(
+  () => import('@/pages/modules/keuangan/PayrollPage'),
+  'PayrollPage',
+)
+const PiutangPage = lazyPage(
+  () => import('@/pages/modules/keuangan/PiutangPage'),
+  'PiutangPage',
+)
+const UtangPage = lazyPage(
+  () => import('@/pages/modules/keuangan/UtangPage'),
+  'UtangPage',
+)
+const LaporanPage = lazyPage(
+  () => import('@/pages/modules/LaporanPage'),
+  'LaporanPage',
+)
+const AbsensiPage = lazyPage(
+  () => import('@/pages/modules/sdm/AbsensiPage'),
+  'AbsensiPage',
+)
+const AbsensiCutiPage = lazyPage(
+  () => import('@/pages/modules/sdm/AbsensiCutiPage'),
+  'AbsensiCutiPage',
+)
+const AbsensiRekapPage = lazyPage(
+  () => import('@/pages/modules/sdm/AbsensiRekapPage'),
+  'AbsensiRekapPage',
+)
+const HrHomePage = lazyPage(
+  () => import('@/pages/modules/hr/HrHomePage'),
+  'HrHomePage',
+)
+const HrKaryawanPage = lazyPage(
+  () => import('@/pages/modules/hr/HrKaryawanPage'),
+  'HrKaryawanPage',
+)
+const HrPayrollPage = lazyPage(
+  () => import('@/pages/modules/hr/HrPayrollPage'),
+  'HrPayrollPage',
+)
+const HrPersetujuanPage = lazyPage(
+  () => import('@/pages/modules/hr/HrPersetujuanPage'),
+  'HrPersetujuanPage',
+)
+const KoreksiPage = lazyPage(
+  () => import('@/pages/modules/persediaan/KoreksiPage'),
+  'KoreksiPage',
+)
+const MutasiPage = lazyPage(
+  () => import('@/pages/modules/persediaan/MutasiPage'),
+  'MutasiPage',
+)
+const SaldoPage = lazyPage(
+  () => import('@/pages/modules/persediaan/SaldoPage'),
+  'SaldoPage',
+)
+const MitraPage = lazyPage(
+  () => import('@/pages/modules/master/MitraPage'),
+  'MitraPage',
+)
+const PenggunaPage = lazyPage(
+  () => import('@/pages/modules/master/PenggunaPage'),
+  'PenggunaPage',
+)
+const OrgStrukturPage = lazyPage(
+  () => import('@/pages/modules/master/OrgStrukturPage'),
+  'OrgStrukturPage',
+)
+const ProdukPage = lazyPage(
+  () => import('@/pages/modules/master/ProdukPage'),
+  'ProdukPage',
+)
+const PembelianPage = lazyPage(
+  () => import('@/pages/modules/PembelianPage'),
+  'PembelianPage',
+)
+const PembayaranPage = lazyPage(
+  () => import('@/pages/modules/pembelian/PembayaranPage'),
+  'PembayaranPage',
+)
+const PencatatanPage = lazyPage(
+  () => import('@/pages/modules/pembelian/PencatatanPage'),
+  'PencatatanPage',
+)
+const PenerimaanPage = lazyPage(
+  () => import('@/pages/modules/pembelian/PenerimaanPage'),
+  'PenerimaanPage',
+)
+const QcPage = lazyPage(() => import('@/pages/modules/pembelian/QcPage'), 'QcPage')
+const ReturPage = lazyPage(
+  () => import('@/pages/modules/pembelian/ReturPage'),
+  'ReturPage',
+)
+const PenjualanPage = lazyPage(
+  () => import('@/pages/modules/PenjualanPage'),
+  'PenjualanPage',
+)
+const OrderPage = lazyPage(
+  () => import('@/pages/modules/penjualan/OrderPage'),
+  'OrderPage',
+)
+const PengirimanPage = lazyPage(
+  () => import('@/pages/modules/penjualan/PengirimanPage'),
+  'PengirimanPage',
+)
+const TagihanPage = lazyPage(
+  () => import('@/pages/modules/penjualan/TagihanPage'),
+  'TagihanPage',
+)
+const PenjualanReturPage = lazyPage(
+  () => import('@/pages/modules/penjualan/ReturPage'),
+  'ReturPage',
+)
+const ProduksiPage = lazyPage(
+  () => import('@/pages/modules/ProduksiPage'),
+  'ProduksiPage',
+)
+const BatchPage = lazyPage(
+  () => import('@/pages/modules/produksi/BatchPage'),
+  'BatchPage',
+)
+const InputOutputPage = lazyPage(
+  () => import('@/pages/modules/produksi/InputOutputPage'),
+  'InputOutputPage',
+)
+const PackingPage = lazyPage(
+  () => import('@/pages/modules/produksi/PackingPage'),
+  'PackingPage',
+)
+const RendemenPage = lazyPage(
+  () => import('@/pages/modules/produksi/RendemenPage'),
+  'RendemenPage',
+)
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-[40vh] w-full items-center justify-center bg-surface">
+      <span
+        className="size-8 animate-spin rounded-full border-2 border-brand-200 border-t-brand-800"
+        role="status"
+        aria-label="Memuat halaman"
+      />
+    </div>
+  )
+}
+
+function Lazy({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<RouteFallback />}>{children}</Suspense>
+}
 
 export function AppRouter() {
   return (
@@ -62,253 +210,595 @@ export function AppRouter() {
 
       <Route element={<RequireAuth />}>
         <Route element={<AuthenticatedProviders />}>
-        <Route path="/portal" element={<PortalPage />} />
-        <Route
-          path="/portal/settings"
-          element={
-            <div className="min-h-screen bg-surface">
-              <PortalNavbar />
-              <main className="motion-page mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
-                <SettingsPage />
-              </main>
-            </div>
-          }
-        />
-
-        <Route
-          path="/absensi"
-          element={
-            <ModuleShell
-              appName="E-Absensi"
-              appTagline="Kehadiran karyawan"
-              title="E-Absensi"
-              subtitle="Check-in / check-out dan cuti / izin"
-              navItems={[
-                { to: '/absensi', label: 'Absensi hari ini', end: true },
-                { to: '/absensi/cuti', label: 'Cuti & izin' },
-                {
-                  to: '/absensi/rekap',
-                  label: 'Rekap pegawai',
-                  roles: ['admin', 'hr'],
-                },
-              ]}
-            />
-          }
-        >
-          <Route index element={<AbsensiPage />} />
-          <Route path="cuti" element={<AbsensiCutiPage />} />
-          <Route path="pengajuan" element={<Navigate to="/absensi/cuti" replace />} />
-          <Route path="riwayat" element={<Navigate to="/absensi/cuti" replace />} />
-          <Route path="rekap" element={<AbsensiRekapPage />} />
-        </Route>
-
-        <Route element={<RequireAnyRole roles={['admin', 'hr']} />}>
           <Route
-            path="/hr"
+            path="/portal"
+            element={
+              <Lazy>
+                <PortalPage />
+              </Lazy>
+            }
+          />
+          <Route
+            path="/portal/settings"
+            element={
+              <div className="min-h-screen bg-surface">
+                <PortalNavbar />
+                <main className="motion-page mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+                  <Lazy>
+                    <SettingsPage />
+                  </Lazy>
+                </main>
+              </div>
+            }
+          />
+
+          <Route
+            path="/absensi"
             element={
               <ModuleShell
-                appName="E-HR"
-                appTagline="SDM & payroll"
-                title="E-HR"
-                subtitle="Persetujuan cuti, rekap, roster, dan persiapan gaji"
+                appName="E-Absensi"
+                appTagline="Kehadiran karyawan"
+                title="E-Absensi"
+                subtitle="Check-in / check-out dan cuti / izin"
                 navItems={[
-                  { to: '/hr', label: 'Beranda', end: true },
-                  { to: '/hr/persetujuan', label: 'Persetujuan cuti' },
-                  { to: '/hr/rekap', label: 'Rekap kehadiran' },
-                  { to: '/hr/karyawan', label: 'Karyawan' },
-                  { to: '/hr/payroll', label: 'Persiapan gaji' },
+                  { to: '/absensi', label: 'Absensi hari ini', end: true },
+                  { to: '/absensi/cuti', label: 'Cuti & izin' },
+                  {
+                    to: '/absensi/rekap',
+                    label: 'Rekap pegawai',
+                    roles: ['admin', 'hr'],
+                  },
                 ]}
               />
             }
           >
-            <Route index element={<HrHomePage />} />
-            <Route path="persetujuan" element={<HrPersetujuanPage />} />
-            <Route path="rekap" element={<AbsensiRekapPage />} />
-            <Route path="karyawan" element={<HrKaryawanPage />} />
-            <Route path="payroll" element={<HrPayrollPage />} />
             <Route
-              path="payroll/persetujuan"
-              element={<Navigate to="/hr/payroll" replace />}
+              index
+              element={
+                <Lazy>
+                  <AbsensiPage />
+                </Lazy>
+              }
             />
-          </Route>
-        </Route>
-
-        <Route element={<RequireRole />}>
-          <Route
-            path="/app/dashboard"
-            element={
-              <AppShell title="Dashboard" subtitle="Ringkasan sesuai peran Anda" />
-            }
-          >
-            <Route index element={<DashboardPage />} />
-          </Route>
-
-          <Route
-            path="/app/inbox"
-            element={
-              <AppShell
-                title="Kotak masuk"
-                subtitle="Pengajuan menunggu persetujuan, retur, batch, payroll, unlock periode"
-              />
-            }
-          >
-            <Route index element={<InboxPage />} />
-          </Route>
-
-          <Route
-            path="/app/settings"
-            element={
-              <AppShell
-                title="Pengaturan"
-                subtitle="Profil, perusahaan, preferensi, notifikasi, dan keamanan"
-              />
-            }
-          >
-            <Route index element={<SettingsPage />} />
-          </Route>
-
-          <Route
-            path="/app/master-data"
-            element={
-              <AppShell
-                title="Master Data"
-                subtitle="Data acuan pemasok, pelanggan, produk, dan pengguna"
-              />
-            }
-          >
-            <Route index element={<MitraPage />} />
-            <Route path="produk" element={<ProdukPage />} />
-            <Route path="pengguna" element={<PenggunaPage />} />
-          </Route>
-
-          <Route
-            path="/app/pembelian"
-            element={
-              <AppShell
-                title="Pembelian Gabah"
-                subtitle="Pencatatan, penerimaan & timbang, dan pembayaran pemasok"
-              />
-            }
-          >
-            <Route element={<PembelianPage />}>
-              <Route index element={<PencatatanPage />} />
+            <Route
+              path="cuti"
+              element={
+                <Lazy>
+                  <AbsensiCutiPage />
+                </Lazy>
+              }
+            />
+            <Route path="pengajuan" element={<Navigate to="/absensi/cuti" replace />} />
+            <Route path="riwayat" element={<Navigate to="/absensi/cuti" replace />} />
+            <Route
+              element={
+                <RequireAnyRole roles={['admin', 'hr']} fallback="/absensi" />
+              }
+            >
               <Route
-                path="pencatatan"
-                element={<Navigate to="/app/pembelian" replace />}
+                path="rekap"
+                element={
+                  <Lazy>
+                    <AbsensiRekapPage />
+                  </Lazy>
+                }
               />
-              <Route path="penerimaan" element={<PenerimaanPage />} />
-              <Route path="pembayaran" element={<PembayaranPage />} />
-              <Route path="retur" element={<ReturPage />} />
-              <Route path="qc" element={<QcPage />} />
+            </Route>
+          </Route>
+
+          <Route element={<RequireAnyRole roles={['admin', 'hr']} />}>
+            <Route
+              path="/hr"
+              element={
+                <ModuleShell
+                  appName="E-HR"
+                  appTagline="SDM & payroll"
+                  title="E-HR"
+                  subtitle="Persetujuan cuti, rekap, roster, dan persiapan gaji"
+                  navItems={[
+                    { to: '/hr', label: 'Beranda', end: true },
+                    { to: '/hr/persetujuan', label: 'Persetujuan cuti' },
+                    { to: '/hr/rekap', label: 'Rekap kehadiran' },
+                    { to: '/hr/karyawan', label: 'Karyawan' },
+                    { to: '/hr/payroll', label: 'Persiapan gaji' },
+                  ]}
+                />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Lazy>
+                    <HrHomePage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="persetujuan"
+                element={
+                  <Lazy>
+                    <HrPersetujuanPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="rekap"
+                element={
+                  <Lazy>
+                    <AbsensiRekapPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="karyawan"
+                element={
+                  <Lazy>
+                    <HrKaryawanPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="payroll"
+                element={
+                  <Lazy>
+                    <HrPayrollPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="payroll/persetujuan"
+                element={<Navigate to="/hr/payroll" replace />}
+              />
+            </Route>
+          </Route>
+
+          <Route element={<RequireRole />}>
+            <Route
+              path="/app/dashboard"
+              element={
+                <AppShell title="Dashboard" subtitle="Ringkasan sesuai peran Anda" />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Lazy>
+                    <DashboardPage />
+                  </Lazy>
+                }
+              />
+            </Route>
+
+            <Route
+              path="/app/inbox"
+              element={
+                <AppShell
+                  title="Kotak masuk"
+                  subtitle="Pengajuan menunggu persetujuan, retur, batch, payroll, unlock periode"
+                />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Lazy>
+                    <InboxPage />
+                  </Lazy>
+                }
+              />
+            </Route>
+
+            <Route
+              path="/app/settings"
+              element={
+                <AppShell
+                  title="Pengaturan"
+                  subtitle="Profil, perusahaan, preferensi, notifikasi, dan keamanan"
+                />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Lazy>
+                    <SettingsPage />
+                  </Lazy>
+                }
+              />
+            </Route>
+
+            <Route
+              path="/app/master-data"
+              element={
+                <AppShell
+                  title="Master Data"
+                  subtitle="Data acuan pemasok, pelanggan, produk, pengguna, dan organisasi"
+                />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Lazy>
+                    <MitraPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="produk"
+                element={
+                  <Lazy>
+                    <ProdukPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="pengguna"
+                element={
+                  <Lazy>
+                    <PenggunaPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="organisasi"
+                element={
+                  <Lazy>
+                    <OrgStrukturPage />
+                  </Lazy>
+                }
+              />
+            </Route>
+
+            <Route
+              path="/app/pembelian"
+              element={
+                <AppShell
+                  title="Pembelian Gabah"
+                  subtitle="Pencatatan, penerimaan & timbang, dan pembayaran pemasok"
+                />
+              }
+            >
+              <Route
+                element={
+                  <Lazy>
+                    <PembelianPage />
+                  </Lazy>
+                }
+              >
+                <Route
+                  index
+                  element={
+                    <Lazy>
+                      <PencatatanPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="pencatatan"
+                  element={<Navigate to="/app/pembelian" replace />}
+                />
+                <Route
+                  path="penerimaan"
+                  element={
+                    <Lazy>
+                      <PenerimaanPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="pembayaran"
+                  element={
+                    <Lazy>
+                      <PembayaranPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="retur"
+                  element={
+                    <Lazy>
+                      <ReturPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="qc"
+                  element={
+                    <Lazy>
+                      <QcPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="utang"
+                  element={<Navigate to="/app/pembelian/pembayaran" replace />}
+                />
+              </Route>
+            </Route>
+
+            <Route
+              path="/app/persediaan"
+              element={
+                <AppShell
+                  title="Persediaan"
+                  subtitle="Saldo, mutasi, transfer lokasi, dan koreksi stok"
+                />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Lazy>
+                    <SaldoPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="mutasi"
+                element={
+                  <Lazy>
+                    <MutasiPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="koreksi"
+                element={
+                  <Lazy>
+                    <KoreksiPage />
+                  </Lazy>
+                }
+              />
+            </Route>
+
+            <Route
+              path="/app/produksi"
+              element={
+                <AppShell
+                  title="Produksi"
+                  subtitle="Batch giling multi-output, approve, dan rendemen"
+                />
+              }
+            >
+              <Route
+                element={
+                  <Lazy>
+                    <ProduksiPage />
+                  </Lazy>
+                }
+              >
+                <Route
+                  index
+                  element={
+                    <Lazy>
+                      <BatchPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="input-output"
+                  element={
+                    <Lazy>
+                      <InputOutputPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="rendemen"
+                  element={
+                    <Lazy>
+                      <RendemenPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="packing"
+                  element={
+                    <Lazy>
+                      <PackingPage />
+                    </Lazy>
+                  }
+                />
+              </Route>
+            </Route>
+
+            <Route
+              path="/app/penjualan"
+              element={
+                <AppShell
+                  title="Penjualan"
+                  subtitle="Order, pengiriman, dan tagihan pelanggan"
+                />
+              }
+            >
+              <Route
+                element={
+                  <Lazy>
+                    <PenjualanPage />
+                  </Lazy>
+                }
+              >
+                <Route
+                  index
+                  element={
+                    <Lazy>
+                      <OrderPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="pengiriman"
+                  element={
+                    <Lazy>
+                      <PengirimanPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="tagihan"
+                  element={
+                    <Lazy>
+                      <TagihanPage />
+                    </Lazy>
+                  }
+                />
+                <Route
+                  path="retur"
+                  element={
+                    <Lazy>
+                      <PenjualanReturPage />
+                    </Lazy>
+                  }
+                />
+              </Route>
+            </Route>
+
+            <Route
+              path="/app/keuangan"
+              element={
+                <AppShell
+                  title="Keuangan"
+                  subtitle="Kas, utang, piutang, dan biaya operasional dasar"
+                />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Lazy>
+                    <KasPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="kas"
+                element={<Navigate to="/app/keuangan" replace />}
+              />
               <Route
                 path="utang"
-                element={<Navigate to="/app/pembelian/pembayaran" replace />}
+                element={
+                  <Lazy>
+                    <UtangPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="piutang"
+                element={
+                  <Lazy>
+                    <PiutangPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="biaya"
+                element={
+                  <Lazy>
+                    <BiayaPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="payroll"
+                element={
+                  <Lazy>
+                    <PayrollPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="coa"
+                element={
+                  <Lazy>
+                    <CoaPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="akun-map"
+                element={
+                  <Lazy>
+                    <AccountMapPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="jurnal"
+                element={
+                  <Lazy>
+                    <JurnalPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="e-faktur"
+                element={
+                  <Lazy>
+                    <EFakturPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="periode"
+                element={
+                  <Lazy>
+                    <PeriodePage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="rekon-bank"
+                element={
+                  <Lazy>
+                    <RekonBankPage />
+                  </Lazy>
+                }
+              />
+              <Route
+                path="utang-piutang"
+                element={<Navigate to="/app/keuangan/utang" replace />}
               />
             </Route>
-          </Route>
 
-          <Route
-            path="/app/persediaan"
-            element={
-              <AppShell
-                title="Persediaan"
-                subtitle="Saldo, mutasi, transfer lokasi, dan koreksi stok"
-              />
-            }
-          >
-            <Route index element={<SaldoPage />} />
-            <Route path="mutasi" element={<MutasiPage />} />
-            <Route path="koreksi" element={<KoreksiPage />} />
-          </Route>
-
-          <Route
-            path="/app/produksi"
-            element={
-              <AppShell
-                title="Produksi"
-                subtitle="Batch giling multi-output, approve, dan rendemen"
-              />
-            }
-          >
-            <Route element={<ProduksiPage />}>
-              <Route index element={<BatchPage />} />
-              <Route path="input-output" element={<InputOutputPage />} />
-              <Route path="rendemen" element={<RendemenPage />} />
-              <Route path="packing" element={<PackingPage />} />
-            </Route>
-          </Route>
-
-          <Route
-            path="/app/penjualan"
-            element={
-              <AppShell
-                title="Penjualan"
-                subtitle="Order, pengiriman, dan tagihan pelanggan"
-              />
-            }
-          >
-            <Route element={<PenjualanPage />}>
-              <Route index element={<OrderPage />} />
-              <Route path="pengiriman" element={<PengirimanPage />} />
-              <Route path="tagihan" element={<TagihanPage />} />
-              <Route path="retur" element={<PenjualanReturPage />} />
-            </Route>
-          </Route>
-
-          <Route
-            path="/app/keuangan"
-            element={
-              <AppShell
-                title="Keuangan"
-                subtitle="Kas, utang, piutang, dan biaya operasional dasar"
-              />
-            }
-          >
-            <Route index element={<KasPage />} />
             <Route
-              path="kas"
-              element={<Navigate to="/app/keuangan" replace />}
-            />
-            <Route path="utang" element={<UtangPage />} />
-            <Route path="piutang" element={<PiutangPage />} />
-            <Route path="biaya" element={<BiayaPage />} />
-            <Route path="payroll" element={<PayrollPage />} />
-            <Route path="coa" element={<CoaPage />} />
-            <Route path="akun-map" element={<AccountMapPage />} />
-            <Route path="jurnal" element={<JurnalPage />} />
-            <Route path="e-faktur" element={<EFakturPage />} />
-            <Route path="periode" element={<PeriodePage />} />
-            <Route path="rekon-bank" element={<RekonBankPage />} />
+              path="/app/laporan"
+              element={
+                <AppShell
+                  title="Laporan"
+                  subtitle="Ringkasan operasional, aging, stok, dan rendemen"
+                />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Lazy>
+                    <LaporanPage />
+                  </Lazy>
+                }
+              />
+            </Route>
+
             <Route
-              path="utang-piutang"
-              element={<Navigate to="/app/keuangan/utang" replace />}
-            />
-          </Route>
-
-          <Route
-            path="/app/laporan"
-            element={
-              <AppShell
-                title="Laporan"
-                subtitle="Ringkasan operasional, aging, stok, dan rendemen"
+              path="/app/audit"
+              element={
+                <AppShell
+                  title="Audit Log"
+                  subtitle="Jejak perubahan dokumen dan aksi penting"
+                />
+              }
+            >
+              <Route
+                index
+                element={
+                  <Lazy>
+                    <AuditPage />
+                  </Lazy>
+                }
               />
-            }
-          >
-            <Route index element={<LaporanPage />} />
+            </Route>
           </Route>
-
-          <Route
-            path="/app/audit"
-            element={
-              <AppShell
-                title="Audit Log"
-                subtitle="Jejak perubahan dokumen dan aksi penting"
-              />
-            }
-          >
-            <Route index element={<AuditPage />} />
-          </Route>
-        </Route>
         </Route>
       </Route>
 

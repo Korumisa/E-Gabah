@@ -1,7 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AbsensiGeoMap, pinsFromRecords } from '@/components/absensi/AbsensiGeoMap'
+import { pinsFromRecords } from '@/components/absensi/absensi-map-pins'
 import { AbsensiHereMap } from '@/components/absensi/AbsensiHereMap'
+
+const AbsensiGeoMap = lazy(() =>
+  import('@/components/absensi/AbsensiGeoMap').then((m) => ({
+    default: m.AbsensiGeoMap,
+  })),
+)
 import { AbsensiLokasiCell } from '@/components/absensi/AbsensiLokasiCell'
 import { AbsensiMonthCalendar } from '@/components/absensi/AbsensiMonthCalendar'
 import { AbsensiMonthChart } from '@/components/absensi/AbsensiMonthChart'
@@ -295,13 +301,21 @@ export function AbsensiPage() {
 
       <AbsensiMonthChart records={monthMine} userId={user.id} days={30} />
 
-      <AbsensiGeoMap
-        title="Titik absensi Anda"
-        subtitle="30 hari terakhir · masuk (hijau) dan keluar (biru)"
-        pins={myPins}
-        emptyHint="Belum ada titik. Lakukan check-in dengan izin lokasi."
-        mapClassName="h-[220px] w-full sm:h-[280px]"
-      />
+      <Suspense
+        fallback={
+          <div className="flex h-[220px] items-center justify-center rounded-2xl border border-line bg-panel text-[13px] text-muted sm:h-[280px]">
+            Memuat peta…
+          </div>
+        }
+      >
+        <AbsensiGeoMap
+          title="Titik absensi Anda"
+          subtitle="30 hari terakhir · masuk (hijau) dan keluar (biru)"
+          pins={myPins}
+          emptyHint="Belum ada titik. Lakukan check-in dengan izin lokasi."
+          mapClassName="h-[220px] w-full sm:h-[280px]"
+        />
+      </Suspense>
 
       <PageSection
         title="Daftar kehadiran hari ini"

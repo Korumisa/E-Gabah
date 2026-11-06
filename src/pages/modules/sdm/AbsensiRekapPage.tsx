@@ -1,6 +1,12 @@
-import { useMemo, useState } from 'react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { AbsensiGeoMap, pinsFromRecords } from '@/components/absensi/AbsensiGeoMap'
+import { pinsFromRecords } from '@/components/absensi/absensi-map-pins'
+
+const AbsensiGeoMap = lazy(() =>
+  import('@/components/absensi/AbsensiGeoMap').then((m) => ({
+    default: m.AbsensiGeoMap,
+  })),
+)
 import { AbsensiLokasiCell } from '@/components/absensi/AbsensiLokasiCell'
 import { AbsensiMonthCalendar } from '@/components/absensi/AbsensiMonthCalendar'
 import { AbsensiMonthChart } from '@/components/absensi/AbsensiMonthChart'
@@ -156,13 +162,21 @@ export function AbsensiRekapPage() {
             setPage(1)
           }}
         />
-        <AbsensiGeoMap
-          title="Peta tim"
-          subtitle={`Titik check-in/out tanggal ${date}`}
-          pins={dayPins}
-          emptyHint="Belum ada lokasi pada tanggal ini."
-          className="h-full"
-        />
+        <Suspense
+          fallback={
+            <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-line bg-panel text-[13px] text-muted">
+              Memuat peta…
+            </div>
+          }
+        >
+          <AbsensiGeoMap
+            title="Peta tim"
+            subtitle={`Titik check-in/out tanggal ${date}`}
+            pins={dayPins}
+            emptyHint="Belum ada lokasi pada tanggal ini."
+            className="h-full"
+          />
+        </Suspense>
       </div>
 
       <AbsensiMonthChart records={recent} days={30} />

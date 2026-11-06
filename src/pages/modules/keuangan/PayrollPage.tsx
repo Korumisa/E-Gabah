@@ -234,8 +234,8 @@ export function PayrollPage() {
 
   return (
     <div className="space-y-2.5">
+      {toast ? <FinanceToast message={toast} /> : null}
       <FinanceStatGrid stats={stats} />
-      <FinanceToast message={toast} />
 
       <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-2">

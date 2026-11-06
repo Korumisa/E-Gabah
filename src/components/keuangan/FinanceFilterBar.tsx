@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { ChevronDownIcon } from '@/components/ui/icons'
+import { formatDisplayDate } from '@/lib/display-date'
 
 export type FilterOption<T extends string> = {
   value: T
@@ -54,12 +55,7 @@ function useDismissible(open: boolean, setOpen: (open: boolean) => void) {
 
 function formatDateShort(iso: string): string {
   if (!iso) return ''
-  const d = new Date(`${iso}T12:00:00`)
-  if (Number.isNaN(d.getTime())) return iso
-  return new Intl.DateTimeFormat('id-ID', {
-    day: 'numeric',
-    month: 'short',
-  }).format(d)
+  return formatDisplayDate(iso, { day: 'numeric', month: 'short' })
 }
 
 function FilterDropdown<T extends string>({

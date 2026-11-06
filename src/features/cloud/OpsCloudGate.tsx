@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 import { ALL_RELATIONAL_HYDRATE_SPECS } from '@/lib/ops-relational/types'
 import {
   flushPendingRelationalSaves,
@@ -11,12 +12,19 @@ import {
 } from '@/lib/cloud-persist-bus'
 import { hydrateAppSettings } from '@/features/settings/settings-cloud'
 
+function isPortalPath(pathname: string) {
+  return pathname === '/portal' || pathname.startsWith('/portal/')
+}
+
 /**
  * Hydrate relational ops tables before feature providers mount.
  * Mounted only under AuthenticatedProviders (after login).
+ * Portal routes stay interactive while hydrate runs in the background.
  */
 export function OpsCloudGate({ children }: { children: ReactNode }) {
   const enabled = isRelationalEnabled()
+  const { pathname } = useLocation()
+  const lightPath = isPortalPath(pathname)
   const [ready, setReady] = useState(!enabled)
   const [loading, setLoading] = useState(enabled)
   const [hydrateError, setHydrateError] = useState<string | null>(null)
@@ -25,18 +33,16 @@ export function OpsCloudGate({ children }: { children: ReactNode }) {
   const runHydrate = useCallback(async () => {
     setLoading(true)
     setHydrateError(null)
-    const { failed } = await hydrateRelationalTables(ALL_RELATIONAL_HYDRATE_SPECS)
+    const [{ failed }] = await Promise.all([
+      hydrateRelationalTables(ALL_RELATIONAL_HYDRATE_SPECS),
+      hydrateAppSettings().catch(() => undefined),
+    ])
     if (failed.length) {
       setReady(false)
       setHydrateError(
         `Gagal memuat tabel cloud: ${failed.join(', ')}. Periksa koneksi / migrasi, lalu coba lagi.`,
       )
     } else {
-      try {
-        await hydrateAppSettings()
-      } catch {
-        // Pengaturan tetap bisa dibaca dari cache lokal.
-      }
       setReady(true)
       setHydrateError(null)
     }
@@ -67,7 +73,7 @@ export function OpsCloudGate({ children }: { children: ReactNode }) {
     }
   }, [enabled])
 
-  if (enabled && (loading || !ready)) {
+  if (enabled && (loading || !ready) && !lightPath) {
     return (
       <div className="flex min-h-screen w-full flex-col items-center justify-center gap-4 bg-stone-50 px-6 text-sm text-stone-600">
         {loading ? (
