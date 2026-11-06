@@ -90,7 +90,7 @@ const DEFAULTS: AppSettings = {
     city: 'Klaten',
     phone: '(0272) 321-450',
     email: 'ops@e-gabah.id',
-    warehouse: 'Gudang Utama A',
+    warehouse: 'Gudang A',
     bankName: 'Bank BRI',
     bankAccount: '0123-01-000789-53-2',
     bankHolder: 'CV E-Gabah Sejahtera',
@@ -105,7 +105,7 @@ const DEFAULTS: AppSettings = {
   },
   stock: {
     valuation: 'average',
-    defaultLocation: 'Gudang Utama A',
+    defaultLocation: 'Gudang A',
     lowStockAlert: true,
     lowStockPct: 10,
     allowNegative: false,
@@ -211,9 +211,14 @@ export function readAppSettings(): AppSettings {
           s.valuation === 'fifo' || s.valuation === 'average'
             ? s.valuation
             : DEFAULTS.stock.valuation,
-        defaultLocation: String(
-          s.defaultLocation ?? DEFAULTS.stock.defaultLocation,
-        ),
+        defaultLocation: (() => {
+          const raw = String(
+            s.defaultLocation ?? DEFAULTS.stock.defaultLocation,
+          ).trim()
+          // Legacy default never matched seeded stock locations.
+          if (!raw || raw === 'Gudang Utama A') return DEFAULTS.stock.defaultLocation
+          return raw
+        })(),
         lowStockAlert: Boolean(s.lowStockAlert ?? DEFAULTS.stock.lowStockAlert),
         lowStockPct: num(s.lowStockPct, DEFAULTS.stock.lowStockPct),
         allowNegative: Boolean(s.allowNegative ?? DEFAULTS.stock.allowNegative),

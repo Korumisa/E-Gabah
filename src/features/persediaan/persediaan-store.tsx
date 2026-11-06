@@ -20,6 +20,8 @@ import {
   type StockRow,
 } from '@/features/persediaan/persediaan-data'
 import {
+  dedupeById,
+  dedupeStocksBySkuLocation,
   loadPersediaanCloud,
   mapSupabaseError,
   savePersediaanCloud,
@@ -65,6 +67,13 @@ type PersediaanStoreValue = {
 
 const PersediaanContext = createContext<PersediaanStoreValue | null>(null)
 
+/** Monotonic ids — Date.now() alone collides when produksi fires many movements in one tick. */
+let persediaanIdSeq = 0
+function newPersediaanRowId(prefix: 'm' | 'k' | 's'): string {
+  persediaanIdSeq += 1
+  return `${prefix}-${Date.now()}-${persediaanIdSeq.toString(36)}-${Math.random().toString(36).slice(2, 6)}`
+}
+
 function adjustStock(
   list: StockRow[],
   sku: string,
@@ -89,7 +98,7 @@ function adjustStock(
   if (delta <= 0) return list
   return [
     {
-      id: `s-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      id: newPersediaanRowId('s'),
       sku,
       name: productName,
       category,
@@ -191,8 +200,24 @@ export function PersediaanProvider({ children }: { children: ReactNode }) {
         skipPersist.current = false
         return
       }
+      const cleanStocks = dedupeStocksBySkuLocation(stocks)
+      const cleanMovements = dedupeById(movements)
+      const cleanCorrections = dedupeById(corrections)
+      if (
+        cleanStocks.length !== stocks.length ||
+        cleanMovements.length !== movements.length ||
+        cleanCorrections.length !== corrections.length
+      ) {
+        skipPersist.current = true
+        setStocks(cleanStocks)
+        setMovements(cleanMovements)
+        setCorrections(cleanCorrections)
+        return
+      }
       const handle = window.setTimeout(() => {
-        void savePersediaanCloud(snapshotOf(stocks, movements, corrections))
+        void savePersediaanCloud(
+          snapshotOf(cleanStocks, cleanMovements, cleanCorrections),
+        )
           .then(() => setPersistError(null))
           .catch((e) => setPersistError(mapSupabaseError(e)))
       }, 300)
@@ -211,7 +236,7 @@ export function PersediaanProvider({ children }: { children: ReactNode }) {
 
       setMovements((list) => {
         const entry: MovementRow = {
-          id: `m-${Date.now()}`,
+          id: newPersediaanRowId('m'),
           date: todayIsoDate(),
           reference: nextMovementRef(list),
           type: input.type,
@@ -287,7 +312,7 @@ export function PersediaanProvider({ children }: { children: ReactNode }) {
       if (locked) return locked
       setCorrections((list) => {
         const entry: CorrectionRow = {
-          id: `k-${Date.now()}`,
+          id: newPersediaanRowId('k'),
           date: todayIsoDate(),
           reference: nextCorrectionRef(list),
           sku: input.sku,

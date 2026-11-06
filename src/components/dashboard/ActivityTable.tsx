@@ -341,14 +341,14 @@ export function ActivityTable({ rows }: { rows: ActivityRow[] }) {
         </table>
       </div>
 
-      <div className="mt-3 flex w-full flex-col gap-2.5 border-t border-line/70 pt-3">
-        <p className="text-[12px] text-muted">
+      <div className="mt-3 flex w-full flex-col gap-2.5 border-t border-line/70 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+        <p className="shrink-0 text-[12px] text-muted">
           {filtered.length === 0
             ? 'Menampilkan 0 dari 0 dokumen'
             : `Menampilkan ${from}–${to} dari ${filtered.length} dokumen`}
         </p>
         {totalPages > 1 ? (
-          <div className="flex w-full items-center justify-between gap-2">
+          <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-1.5">
             <button
               type="button"
               disabled={safePage <= 1}
@@ -357,7 +357,7 @@ export function ActivityTable({ rows }: { rows: ActivityRow[] }) {
             >
               Sebelumnya
             </button>
-            <div className="flex flex-wrap items-center justify-center gap-1">
+            <div className="flex flex-wrap items-center justify-center gap-1 sm:justify-start">
               {pageItems.map((item, index) =>
                 item === '…' ? (
                   <span

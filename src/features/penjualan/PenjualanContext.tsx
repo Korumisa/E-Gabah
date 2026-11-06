@@ -39,6 +39,7 @@ import {
 } from '@/features/penjualan/penjualan-data'
 import { penjualanRepository } from '@/features/penjualan/penjualan-storage'
 import { usePersediaanStore } from '@/features/persediaan/persediaan-store'
+import { resolveStockLocation } from '@/features/persediaan/persediaan-utils'
 import {
   getOrderPrefix,
   getPaymentTermDays,
@@ -317,7 +318,7 @@ export function PenjualanProvider({ children }: { children: ReactNode }) {
     receivables,
   } = useFinanceStore()
   const { recordTaxDoc, recordSaleInvoice, voidTaxForSource } = useTaxStore()
-  const { addMovement } = usePersediaanStore()
+  const { addMovement, stocks } = usePersediaanStore()
   const { appendAudit } = useAuditStore()
   const { lotCosts } = useProduksi()
   const initialSnapshot = useMemo(() => penjualanRepository.load(), [])
@@ -442,11 +443,20 @@ export function PenjualanProvider({ children }: { children: ReactNode }) {
       const locked = assertPeriodOpen(today)
       if (locked) return { ok: false, error: locked }
       const termDays = getPaymentTermDays()
-      const location = readAppSettings().stock.defaultLocation
+      const preferredLocation = readAppSettings().stock.defaultLocation
       const current = items.find((o) => o.id === id)
       if (!current || current.voidedAt) {
         return { ok: false, error: 'Order tidak ditemukan' }
       }
+
+      const stockLoc = resolveStockLocation(
+        stocks,
+        current.sku,
+        current.qty,
+        preferredLocation,
+      )
+      if (!stockLoc.ok) return { ok: false, error: stockLoc.error }
+      const location = stockLoc.location
 
       const cogs = cogsAmountForLot(lotCosts, input.lotId, current.qty)
       if (!cogs.ok) return { ok: false, error: cogs.error }
@@ -597,6 +607,7 @@ export function PenjualanProvider({ children }: { children: ReactNode }) {
       addMovement,
       items,
       lotCosts,
+      stocks,
       upsertReceivableFromSale,
       postJournalEntry,
       mapAccount,

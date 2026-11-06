@@ -6,6 +6,31 @@ import {
   type StockRow,
 } from '@/features/persediaan/persediaan-data'
 
+/** Lokasi keluar stok: preferensi settings, lalu baris yang qty-nya cukup. */
+export function resolveStockLocation(
+  stocks: Pick<StockRow, 'sku' | 'location' | 'qty'>[],
+  sku: string,
+  qty: number,
+  preferred?: string,
+): { ok: true; location: string } | { ok: false; error: string } {
+  const rows = stocks.filter((s) => s.sku === sku)
+  const pref = preferred?.trim()
+  if (pref) {
+    const hit = rows.find((s) => s.location === pref && s.qty >= qty)
+    if (hit) return { ok: true, location: hit.location }
+  }
+  const enough = rows.find((s) => s.qty >= qty)
+  if (enough) return { ok: true, location: enough.location }
+  if (rows.length === 0) {
+    return { ok: false, error: `SKU ${sku} belum ada di persediaan.` }
+  }
+  const total = rows.reduce((sum, r) => sum + r.qty, 0)
+  return {
+    ok: false,
+    error: `Stok ${sku} tidak cukup (tersedia ${total}, perlu ${qty}).`,
+  }
+}
+
 const MONTH_INDEX: Record<string, number> = {
   jan: 0,
   feb: 1,

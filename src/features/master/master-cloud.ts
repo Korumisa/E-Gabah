@@ -28,6 +28,13 @@ export function mapSupabaseError(err: unknown): string {
     return 'Akun ini tidak berhak mengubah data tersebut.'
   }
   if (
+    code === '23505' ||
+    /duplicate key|unique constraint|affect row a second time/i.test(msg)
+  ) {
+    console.error(msg)
+    return 'Data bentrok (duplikat). Muat ulang halaman lalu coba lagi.'
+  }
+  if (
     /VITE_|dikonfigurasi|PGRST|JWT|relation |column |Failed to fetch|schema cache/i.test(
       msg,
     )

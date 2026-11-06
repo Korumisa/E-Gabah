@@ -34,15 +34,15 @@ export function FinancePager({
   const items = getPageItems(page, pageCount)
 
   return (
-    <div className="mt-3.5 flex w-full flex-col gap-2.5 border-t border-line/70 pt-3">
-      <p className="text-[12px] text-muted">
+    <div className="mt-3.5 flex w-full flex-col gap-2.5 border-t border-line/70 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+      <p className="shrink-0 text-[12px] text-muted">
         {total === 0
           ? 'Menampilkan 0 dari 0 entri'
           : `Menampilkan ${from}–${to} dari ${total} entri`}
       </p>
 
       {pageCount > 1 ? (
-        <div className="flex w-full items-center justify-between gap-2">
+        <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end sm:gap-1.5">
           <button
             type="button"
             disabled={page <= 1}
@@ -52,7 +52,7 @@ export function FinancePager({
             Sebelumnya
           </button>
 
-          <div className="flex flex-wrap items-center justify-center gap-1">
+          <div className="flex flex-wrap items-center justify-center gap-1 sm:justify-start">
             {items.map((item, index) =>
               item === '…' ? (
                 <span

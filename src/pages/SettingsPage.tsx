@@ -420,7 +420,7 @@ export function SettingsPage() {
     phone: stored.company?.phone ?? '(0272) 321-450',
     email: stored.company?.email ?? 'ops@e-gabah.id',
     website: stored.company?.website ?? 'https://e-gabah.id',
-    warehouse: stored.company?.warehouse ?? 'Gudang Utama A',
+    warehouse: stored.company?.warehouse ?? 'Gudang A',
     bankName: stored.company?.bankName ?? 'Bank BRI',
     bankAccount: stored.company?.bankAccount ?? '0123-01-000789-53-2',
     bankHolder: stored.company?.bankHolder ?? 'CV E-Gabah Sejahtera',
@@ -443,7 +443,7 @@ export function SettingsPage() {
 
   const defaultStock: StockForm = {
     valuation: stored.stock?.valuation ?? 'average',
-    defaultLocation: stored.stock?.defaultLocation ?? 'Gudang Utama A',
+    defaultLocation: stored.stock?.defaultLocation ?? 'Gudang A',
     lowStockAlert: stored.stock?.lowStockAlert ?? true,
     lowStockPct: stored.stock?.lowStockPct ?? '10',
     allowNegative: stored.stock?.allowNegative ?? false,
