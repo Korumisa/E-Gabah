@@ -7,6 +7,8 @@ import {
 import { FinancePager } from '@/components/keuangan/FinancePager'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -542,7 +544,39 @@ export function JurnalPage() {
           onAction={openManual}
         />
 
-        <FinanceTable minWidth="880px">
+        <FinanceTable
+          minWidth="880px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Belum ada jurnal yang cocok." />
+            ) : (
+              rows.map((row) => {
+                const st = journalStatus(row)
+                return (
+                  <FinanceListCard
+                    key={row.id}
+                    title={row.id}
+                    subtitle={formatJournalDate(row.date)}
+                    badges={
+                      <>
+                        <StatusPill
+                          label={SOURCE_LABEL[row.sourceType]}
+                          tone={SOURCE_TONE[row.sourceType]}
+                        />
+                        <StatusPill label={st.label} tone={st.tone} />
+                      </>
+                    }
+                    facts={[
+                      { label: 'Memo', value: row.memo },
+                      { label: 'Source key', value: row.sourceKey ?? '—' },
+                    ]}
+                    onClick={() => setDetail(row)}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh
@@ -643,7 +677,26 @@ export function JurnalPage() {
             Operasi modul sudah jalan; retry hanya mengulang posting GL.
           </p>
           <div className="mt-3">
-          <FinanceTable minWidth="640px">
+          <FinanceTable
+            minWidth="640px"
+            mobileCards={failedPosts.map((f) => (
+              <FinanceListCard
+                key={f.sourceKey}
+                title={f.sourceKey}
+                subtitle={f.payload.memo}
+                facts={[{ label: 'Error', value: f.error }]}
+                action={
+                  <button
+                    type="button"
+                    onClick={() => handleRetry(f.sourceKey)}
+                    className="rounded-lg bg-brand-800 px-3 py-1.5 text-[12px] font-semibold text-white transition hover:bg-brand-900"
+                  >
+                    Retry
+                  </button>
+                }
+              />
+            ))}
+          >
             <FinanceThead>
               <FinanceTh>Source key</FinanceTh>
               <FinanceTh>Memo</FinanceTh>

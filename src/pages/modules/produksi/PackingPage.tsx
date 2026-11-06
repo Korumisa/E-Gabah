@@ -4,6 +4,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -260,7 +262,43 @@ export function PackingPage() {
           }
         />
 
-        <FinanceTable minWidth="820px">
+        <FinanceTable
+          minWidth="820px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Belum ada pack run yang cocok." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.id}
+                  subtitle={row.batchId}
+                  badges={
+                    <StatusPill
+                      label={packStageLabel(row)}
+                      tone={packStageTone(row)}
+                    />
+                  }
+                  facts={[
+                    { label: 'Sumber SKU', value: row.sourceSku },
+                    {
+                      label: 'Qty',
+                      value: formatKg(sumPackRunOutQty(row)),
+                    },
+                    {
+                      label: 'Tanggal',
+                      value: formatDate(dateKey(row.createdAt)),
+                    },
+                  ]}
+                  onClick={() => {
+                    setCreating(false)
+                    setDrawerId(row.id)
+                  }}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh label="Pack" sortKey="id" sort={sort} onSort={handleSort} />

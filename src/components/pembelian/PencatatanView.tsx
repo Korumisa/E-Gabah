@@ -4,6 +4,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -294,7 +296,48 @@ export function PencatatanView({
           onAction={onCreate}
         />
 
-        <FinanceTable minWidth="860px">
+        <FinanceTable
+          minWidth="860px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty
+                message={
+                  purchases.length === 0
+                    ? 'Belum ada dokumen pembelian. Mulai dengan mencatat pembelian gabah.'
+                    : 'Tidak ada catatan yang cocok dengan filter.'
+                }
+              />
+            ) : (
+              rows.map((p) => {
+                const s = summarize(p)
+                const supplier = getSupplier(p.supplierId)
+                const value = isPurchaseReceivedForAp(p.stage)
+                  ? s.total
+                  : s.estimatedValue
+                return (
+                  <FinanceListCard
+                    key={p.id}
+                    title={p.id}
+                    subtitle={`${supplier?.name ?? '—'} · ${p.grain}`}
+                    badges={
+                      <StatusPill label={STAGE_LABEL[p.stage]} tone={STAGE_TONE[p.stage]} />
+                    }
+                    facts={[
+                      { label: 'Tanggal', value: formatDate(p.date) },
+                      { label: 'Nilai', value: formatRupiah(value) },
+                      {
+                        label: 'Karung',
+                        value: `${p.sacks} karung · ±${formatKg(p.estimatedKg)}`,
+                      },
+                      { label: 'Desa', value: supplier?.village ?? '—' },
+                    ]}
+                    onClick={() => openDetail(p)}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh label="Dokumen" sortKey="id" sort={sort} onSort={handleSort} />

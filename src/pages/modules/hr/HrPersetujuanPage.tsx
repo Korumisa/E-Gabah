@@ -4,6 +4,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import {
   ActorCell,
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -138,7 +140,69 @@ export function HrPersetujuanPage() {
         subtitle="Cek bukti + isi alasan sebelum setujui/tolak. Admin dapat override keputusan HR"
         actions={<FinanceToast message={toast} />}
       >
-        <FinanceTable minWidth="960px">
+        <FinanceTable
+          minWidth="960px"
+          mobileCards={
+            pending.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada pengajuan pending." />
+            ) : (
+              pending.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.userName}
+                  subtitle={LEAVE_TYPE_LABEL[row.leaveType]}
+                  facts={[
+                    {
+                      label: 'Tanggal',
+                      value: `${row.startDate}${
+                        row.endDate !== row.startDate ? ` → ${row.endDate}` : ''
+                      } (${row.days}h)`,
+                    },
+                    { label: 'Alasan', value: row.reason },
+                    { label: 'Bukti', value: <ProofLink row={row} /> },
+                  ]}
+                  action={
+                    <div className="w-full min-w-[140px] space-y-2">
+                      <TextField
+                        id={`note-m-${row.id}`}
+                        label="Alasan"
+                        value={noteOf(row.id)}
+                        onChange={(e) =>
+                          setNotes((m) => ({ ...m, [row.id]: e.target.value }))
+                        }
+                        placeholder="Wajib diisi…"
+                      />
+                      <div className="inline-flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="text-[12px] font-medium text-brand-800 hover:underline"
+                          onClick={() => {
+                            void approveLeave(row.id, noteOf(row.id)).then(
+                              (err) => setToast(err ?? 'Disetujui'),
+                            )
+                          }}
+                        >
+                          Setujui
+                        </button>
+                        <button
+                          type="button"
+                          className="text-[12px] font-medium text-red-700 hover:underline"
+                          onClick={() => {
+                            void rejectLeave(row.id, noteOf(row.id)).then(
+                              (err) => setToast(err ?? 'Ditolak'),
+                            )
+                          }}
+                        >
+                          Tolak
+                        </button>
+                      </div>
+                    </div>
+                  }
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh
@@ -259,7 +323,92 @@ export function HrPersetujuanPage() {
             : 'Riwayat diputuskan'
         }
       >
-        <FinanceTable minWidth="960px">
+        <FinanceTable
+          minWidth="960px"
+          mobileCards={
+            decided.length === 0 ? (
+              <FinanceListEmpty message="Belum ada keputusan." />
+            ) : (
+              decided.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.userName}
+                  subtitle={LEAVE_TYPE_LABEL[row.leaveType]}
+                  badges={
+                    <StatusPill
+                      label={LEAVE_STATUS_LABEL[row.status]}
+                      tone={row.status === 'approved' ? 'good' : 'danger'}
+                    />
+                  }
+                  facts={[
+                    { label: 'Bukti', value: <ProofLink row={row} /> },
+                    { label: 'Catatan', value: row.reviewNote ?? '—' },
+                    { label: 'Reviewer', value: row.reviewedBy ?? '—' },
+                    ...(row.overrideNote
+                      ? [
+                          {
+                            label: 'Override',
+                            value: `${row.overriddenBy}: ${row.overrideNote}`,
+                          },
+                        ]
+                      : []),
+                  ]}
+                  action={
+                    user.role === 'admin' ? (
+                      <div className="w-full min-w-[140px] space-y-2">
+                        <TextField
+                          id={`ov-m-${row.id}`}
+                          label="Override"
+                          value={noteOf(`ov-${row.id}`)}
+                          onChange={(e) =>
+                            setNotes((m) => ({
+                              ...m,
+                              [`ov-${row.id}`]: e.target.value,
+                            }))
+                          }
+                          placeholder="Alasan override…"
+                        />
+                        {row.status === 'rejected' ? (
+                          <button
+                            type="button"
+                            className="text-[12px] font-medium text-brand-800 hover:underline"
+                            onClick={() => {
+                              void overrideLeave(
+                                row.id,
+                                'approved',
+                                noteOf(`ov-${row.id}`),
+                              ).then((err) =>
+                                setToast(err ?? 'Override: disetujui'),
+                              )
+                            }}
+                          >
+                            Override setujui
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="text-[12px] font-medium text-red-700 hover:underline"
+                            onClick={() => {
+                              void overrideLeave(
+                                row.id,
+                                'rejected',
+                                noteOf(`ov-${row.id}`),
+                              ).then((err) =>
+                                setToast(err ?? 'Override: ditolak'),
+                              )
+                            }}
+                          >
+                            Override tolak
+                          </button>
+                        )}
+                      </div>
+                    ) : undefined
+                  }
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh

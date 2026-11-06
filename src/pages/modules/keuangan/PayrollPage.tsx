@@ -10,6 +10,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -277,7 +279,33 @@ export function PayrollPage() {
           onAction={handleCreate}
         />
 
-        <FinanceTable minWidth="720px">
+        <FinanceTable
+          minWidth="720px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Belum ada payroll." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.id}
+                  subtitle={row.period}
+                  badges={
+                    <StatusPill
+                      label={PAYROLL_STATUS_LABEL[row.status]}
+                      tone={STATUS_TONE[row.status]}
+                    />
+                  }
+                  facts={[
+                    { label: 'Total', value: formatIdr(runTotal(row)) },
+                    { label: 'Actor', value: row.actor },
+                  ]}
+                  onClick={() => openDetail(row.id)}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceSortTh
               label="ID"

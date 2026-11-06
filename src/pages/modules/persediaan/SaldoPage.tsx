@@ -11,6 +11,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -187,7 +189,49 @@ export function SaldoPage() {
           }}
         />
 
-        <FinanceTable minWidth="820px">
+        <FinanceTable
+          minWidth="820px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada stok yang cocok." />
+            ) : (
+              rows.map((row) => {
+                const low = isLowStock(row)
+                return (
+                  <FinanceListCard
+                    key={row.id}
+                    title={row.name}
+                    subtitle={row.sku}
+                    badges={
+                      <>
+                        <StatusPill
+                          label={CATEGORY_LABEL[row.category as StockCategory]}
+                          tone="neutral"
+                        />
+                        <StatusPill
+                          label={low ? 'Rendah' : 'Aman'}
+                          tone={low ? 'warn' : 'good'}
+                        />
+                      </>
+                    }
+                    facts={[
+                      { label: 'Lokasi', value: row.location },
+                      {
+                        label: 'Saldo',
+                        value: formatQty(row.qty, row.unit),
+                      },
+                      {
+                        label: 'Min',
+                        value: formatQty(row.minQty, row.unit),
+                      },
+                    ]}
+                    onClick={() => setDetail(row)}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh label="SKU" sortKey="sku" sort={sort} onSort={(k) => { setSort((p) => toggleSort(p, k)); setPage(1) }} />

@@ -12,6 +12,7 @@ Ops modul memakai **Supabase relational tables** bila `VITE_SUPABASE_*` diset; t
 | Cuti / leave | Cloud `leave_requests` atau local | `leave-cloud.ts` / `leave-storage.ts` |
 | Ops (PO/SO/batch/kas/GL/tax/bank/period/payroll/audit) | Relational via `createRelationalBackedRepository` | `src/lib/cloud-relational.ts`, `ops-relational/mappers/*` |
 | Settings / theme | Local + optional `app_settings` cloud | `app-settings.ts` / `settings-cloud.ts` |
+| Organisasi (jabatan/dept/cabang) | Local + `app_settings` id `org-structure` | `org-structure.ts` / `org-structure-cloud.ts` |
 
 Hydrate gate: `OpsCloudGate` (fail-closed di modul; `/portal*` tidak diblokir saat hydrate berjalan). Route page di-lazy; Leaflet absensi di-chunk terpisah.
 
@@ -48,7 +49,8 @@ Hydrate gate: `OpsCloudGate` (fail-closed di modul; `/portal*` tidak diblokir sa
 15. `20261105_16_mfa_aal_gate.sql` — `auth_mfa_satisfied()` + restrictive RLS opt-in MFA
 16. `20261105_17_select_sessions_login_alert.sql` — SELECT per role, session RPC, `login_alerts`
 17. `20261105_18_period_read_nav_align.sql` — baca `period` selaras nav unlock (ops roles)
-18. `supabase/manual/20261105_99_ops_relational_drop_legacy.sql` — **manual setelah smoke**; drop `ops_docs` + `app_module_snapshots`
+18. `20261106_19_org_structure_settings.sql` — RLS `app_settings` id `org-structure` (katalog jabatan/dept/cabang)
+19. `supabase/manual/20261105_99_ops_relational_drop_legacy.sql` — **manual setelah smoke**; drop `ops_docs` + `app_module_snapshots`
 
 ## Deploy checklist (Vercel)
 
@@ -70,12 +72,26 @@ Setelah mengubah env → **Redeploy** (Vite bake env saat build).
 
 Tanpa `VITE_SUPABASE_*` di production build, login ditolak (demo auth mati).
 
-### Langkah
+### Langkah cutover
 
-1. Set env di Vercel → Redeploy (`vercel.json` SPA rewrite sudah ada).
-2. Apply migrasi 01→18 ke project Supabase target; **jangan** jalankan `supabase/manual/99_drop_legacy` sebelum verify. Deploy Edge Function `login-alert` + secret `RESEND_API_KEY` untuk email login.
-3. Smoke: login → **Portal** → E-Gabah / E-Absensi / E-HR; check-in cloud; ajukan cuti; payroll HR→admin→keuangan→cair; ganti password; restore backup tidak boleh inject `egabah.auth.*`; gudang tidak bisa upsert `purchases`.
-4. Deploy frontend (`npm run build` / Vercel).
-5. Baru jalankan `supabase/manual/20261105_99_ops_relational_drop_legacy.sql` setelah cutover OK.
+1. Set env di Vercel (`VITE_SUPABASE_*`, `VITE_CLOUDINARY_*`) → Redeploy (`vercel.json` SPA rewrite sudah ada).
+2. Apply migrasi **01→19** ke project Supabase target (`psql -f …` atau SQL editor). Termasuk `20261106_19_org_structure_settings.sql`.
+3. Deploy Edge Function login alert:
+   - `supabase functions deploy login-alert`
+   - `supabase secrets set RESEND_API_KEY=re_…`
+   - Tanpa Resend: alert tetap tercatat di `login_alerts`, email dilewati.
+4. Smoke live (atau `npm run smoketest` + `npm run e2e:need-live` dengan `SMOKE_BASE`):
+   - Login → **Portal** → E-Gabah / E-Absensi / E-HR (role non-HR tidak lihat E-HR)
+   - Master → Organisasi & lokasi: tambah jabatan, reload device lain → opsi muncul
+   - Check-in cloud (GPS); ajukan cuti; payroll HR→admin→keuangan→cair
+   - Ganti password; MFA opt-in; sesi perangkat revoke
+   - Restore backup tidak boleh inject `egabah.auth.*`
+   - Gudang tidak bisa upsert `purchases`
+5. Deploy frontend (`npm run build` / Vercel).
+6. **Baru** jalankan `supabase/manual/20261105_99_ops_relational_drop_legacy.sql` setelah cutover OK.
 
 Seed master: `docs/supabase-seed-master.md` + `supabase/seed/20261030_master_data.sql`.
+
+### CI
+
+GitHub Actions (`.github/workflows/ci.yml`): `npm ci` → `npm run build` → `npm run smoketest-no-compile` pada push/PR.

@@ -56,11 +56,29 @@ const migration = fs.existsSync(
 if (settingsCloud && migration) pass('pengaturan dan akun cabang ada di kode')
 else fail('pengaturan dan akun cabang ada di kode')
 
-const securityHardening = fs.existsSync(
-  path.join(root, 'supabase/migrations/20261105_14_security_hardening.sql'),
+const requiredMigrations = [
+  '20261105_14_security_hardening.sql',
+  '20261105_16_mfa_aal_gate.sql',
+  '20261105_17_select_sessions_login_alert.sql',
+  '20261105_18_period_read_nav_align.sql',
+  '20261106_19_org_structure_settings.sql',
+]
+const missingMigrations = requiredMigrations.filter(
+  (name) => !fs.existsSync(path.join(root, 'supabase/migrations', name)),
 )
-if (securityHardening) pass('migrasi security hardening 14 ada')
-else fail('migrasi security hardening 14 ada')
+if (missingMigrations.length === 0) pass('migrasi keamanan/MFA/org 14–19 ada')
+else fail('migrasi keamanan/MFA/org 14–19 ada', missingMigrations.join(', '))
+
+const orgCloud = fs.existsSync(
+  path.join(src, 'features/master/org-structure-cloud.ts'),
+)
+const loginAlertFn = fs.existsSync(
+  path.join(root, 'supabase/functions/login-alert/index.ts'),
+)
+if (orgCloud) pass('org-structure cloud adapter ada')
+else fail('org-structure cloud adapter ada')
+if (loginAlertFn) pass('edge function login-alert ada')
+else fail('edge function login-alert ada')
 
 function loadDatabaseUrl() {
   const envFile = path.join(root, '.env.local')

@@ -11,6 +11,8 @@ import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   ActorCell,
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -238,7 +240,38 @@ export function KoreksiPage() {
           onAction={openForm}
         />
 
-        <FinanceTable minWidth="900px">
+        <FinanceTable
+          minWidth="900px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada koreksi yang cocok." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.reference}
+                  subtitle={row.productName}
+                  badges={
+                    <StatusPill
+                      label={row.status === 'posted' ? 'Posted' : 'Void'}
+                      tone={row.status === 'posted' ? 'good' : 'muted'}
+                    />
+                  }
+                  facts={[
+                    { label: 'Tanggal', value: row.date },
+                    { label: 'SKU', value: row.sku },
+                    { label: 'Lokasi', value: row.location },
+                    {
+                      label: 'Sebelum → sesudah',
+                      value: `${formatQty(row.beforeQty, row.unit)} → ${formatQty(row.afterQty, row.unit)}`,
+                    },
+                  ]}
+                  onClick={() => setDetail(row)}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh label="Referensi" sortKey="reference" sort={sort} onSort={(k) => { setSort((p) => toggleSort(p, k)); setPage(1) }} />

@@ -4,6 +4,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -196,7 +198,54 @@ export function RendemenView({
           />
         </div>
 
-        <FinanceTable>
+        <FinanceTable
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada data." />
+            ) : (
+              rows.map((row) => {
+                const actual = actualRendemen(row)
+                const delta = actual - row.targetRendemen
+                const cost = costByBatch.get(row.id)
+                return (
+                  <FinanceListCard
+                    key={row.id}
+                    title={row.id}
+                    subtitle={row.inputName}
+                    badges={
+                      <>
+                        <StatusPill
+                          label={`${delta >= 0 ? '+' : ''}${delta.toFixed(1)} pp`}
+                          tone={delta >= 0 ? 'good' : 'warn'}
+                        />
+                        <StageLabel stage={row.stage} />
+                      </>
+                    }
+                    facts={[
+                      { label: 'Tanggal', value: formatDate(row.date) },
+                      {
+                        label: 'Target',
+                        value: `${row.targetRendemen.toFixed(1)}%`,
+                      },
+                      { label: 'Aktual', value: `${actual.toFixed(1)}%` },
+                      {
+                        label: 'Cost/kg beras',
+                        value:
+                          cost && cost.costPerKgBeras > 0
+                            ? formatRupiah(cost.costPerKgBeras)
+                            : '—',
+                      },
+                    ]}
+                    onClick={() => {
+                      setDetail(row)
+                      onSelect(row.id)
+                    }}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-10">#</FinanceTh>
             <FinanceSortTh label="Batch" sortKey="id" sort={sort} onSort={handleSort} />

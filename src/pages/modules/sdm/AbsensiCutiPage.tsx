@@ -4,6 +4,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { PageSection } from '@/components/ui/PageSection'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -213,7 +215,78 @@ export function AbsensiCutiPage() {
           onAction={() => setOpen(true)}
         />
 
-        <FinanceTable minWidth="780px">
+        <FinanceTable
+          minWidth="780px"
+          mobileCards={
+            mine.length === 0 ? (
+              <FinanceListEmpty message="Belum ada pengajuan. Tekan Ajukan untuk membuat." />
+            ) : (
+              mine.map((row) => {
+                const url = proofPreviewUrl(row.proof)
+                return (
+                  <FinanceListCard
+                    key={row.id}
+                    title={LEAVE_TYPE_LABEL[row.leaveType]}
+                    subtitle={row.reason}
+                    badges={
+                      <StatusPill
+                        label={LEAVE_STATUS_LABEL[row.status]}
+                        tone={
+                          row.status === 'approved'
+                            ? 'good'
+                            : row.status === 'pending'
+                              ? 'warn'
+                              : 'muted'
+                        }
+                      />
+                    }
+                    facts={[
+                      {
+                        label: 'Tanggal',
+                        value: `${row.startDate}${
+                          row.endDate !== row.startDate
+                            ? ` → ${row.endDate}`
+                            : ''
+                        }`,
+                      },
+                      { label: 'Hari', value: row.days },
+                      {
+                        label: 'Bukti',
+                        value: url ? (
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[12px] font-medium text-brand-800 hover:underline"
+                          >
+                            Lihat
+                          </a>
+                        ) : (
+                          proofDisplayName(row.proof)
+                        ),
+                      },
+                    ]}
+                    action={
+                      row.status === 'pending' ? (
+                        <button
+                          type="button"
+                          className="text-[12px] font-medium text-red-700 hover:underline"
+                          onClick={() => {
+                            void cancelLeave(row.id).then((err) =>
+                              setToast(err ?? 'Dibatalkan'),
+                            )
+                          }}
+                        >
+                          Batalkan
+                        </button>
+                      ) : undefined
+                    }
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh

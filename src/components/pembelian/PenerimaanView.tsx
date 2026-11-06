@@ -10,6 +10,8 @@ import {
 } from '@/components/keuangan/ReceiptUpload'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -303,7 +305,53 @@ export function PenerimaanView({
           }}
         />
 
-        <FinanceTable minWidth="820px">
+        <FinanceTable
+          minWidth="820px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada dokumen yang cocok." />
+            ) : (
+              rows.map((p) => {
+                const supplier = getSupplier(p.supplierId)
+                const dateShow =
+                  p.weighing?.confirmedAt ?? p.weighing?.weighedAt ?? p.date
+                const qc =
+                  p.lotId != null ? getLotQc(lotQc, p.lotId) : undefined
+                return (
+                  <FinanceListCard
+                    key={p.id}
+                    title={p.id}
+                    subtitle={supplier?.name}
+                    badges={
+                      <>
+                        <StatusPill
+                          label={STAGE_LABEL[p.stage]}
+                          tone={
+                            isPurchaseReceivedForAp(p.stage)
+                              ? 'good'
+                              : p.stage === 'ditimbang'
+                                ? 'warn'
+                                : 'neutral'
+                          }
+                        />
+                        {p.lotId ? (
+                          <StatusPill label={qcLabel(qc)} tone={qcTone(qc)} />
+                        ) : null}
+                      </>
+                    }
+                    facts={[
+                      { label: 'Gabah', value: p.grain },
+                      { label: 'Tanggal', value: formatDate(dateShow) },
+                      { label: 'Taksiran', value: formatKg(p.estimatedKg) },
+                      { label: 'Karung', value: String(p.sacks) },
+                    ]}
+                    onClick={() => setDetail(p)}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh label="Dokumen" sortKey="id" sort={sort} onSort={handleSort} />

@@ -7,6 +7,8 @@ import {
 import { FinancePager } from '@/components/keuangan/FinancePager'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -255,7 +257,65 @@ export function CoaPage() {
           onAction={openAdd}
         />
 
-        <FinanceTable minWidth="720px">
+        <FinanceTable
+          minWidth="720px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada akun yang cocok." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.code}
+                  subtitle={row.name}
+                  badges={
+                    <>
+                      <StatusPill
+                        label={ACCOUNT_TYPE_LABEL[row.type]}
+                        tone="neutral"
+                      />
+                      <StatusPill
+                        label={row.active ? 'Aktif' : 'Nonaktif'}
+                        tone={row.active ? 'good' : 'muted'}
+                      />
+                      {row.system ? (
+                        <StatusPill label="Sistem" tone="warn" />
+                      ) : null}
+                    </>
+                  }
+                  action={
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        onClick={() => openEdit(row)}
+                        className="rounded-lg px-2.5 py-1.5 text-[12px] font-medium text-brand-800 transition hover:bg-brand-50"
+                      >
+                        Edit
+                      </button>
+                      {row.active ? (
+                        <button
+                          type="button"
+                          onClick={() => setDeactivateTarget(row)}
+                          className="rounded-lg px-2.5 py-1.5 text-[12px] font-medium text-red-700 transition hover:bg-red-50"
+                        >
+                          Nonaktifkan
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => activate(row)}
+                          className="rounded-lg px-2.5 py-1.5 text-[12px] font-medium text-ink transition hover:bg-surface"
+                        >
+                          Aktifkan
+                        </button>
+                      )}
+                    </div>
+                  }
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh

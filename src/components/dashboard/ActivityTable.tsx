@@ -341,13 +341,13 @@ export function ActivityTable({ rows }: { rows: ActivityRow[] }) {
         </table>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[12px] text-muted">
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+        <p className="shrink-0 text-[12px] text-muted">
           {filtered.length === 0
             ? 'Menampilkan 0 dari 0 dokumen'
             : `Menampilkan ${from}–${to} dari ${filtered.length} dokumen`}
         </p>
-        <div className="flex flex-wrap items-center gap-1">
+        <div className="flex flex-wrap items-center justify-end gap-1">
           <button
             type="button"
             disabled={safePage <= 1}

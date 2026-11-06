@@ -10,6 +10,8 @@ import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   ActorCell,
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceTable,
   FinanceTd,
   FinanceTh,
@@ -272,7 +274,44 @@ export function KasPage() {
           onAction={openForm}
         />
 
-        <FinanceTable minWidth="780px">
+        <FinanceTable
+          minWidth="780px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty
+                message={
+                  cashEntries.length === 0
+                    ? 'Belum ada mutasi kas. Catat pemasukan atau pengeluaran pertama.'
+                    : 'Tidak ada mutasi yang cocok dengan filter.'
+                }
+              />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.reference}
+                  subtitle={row.description}
+                  badges={
+                    <StatusPill
+                      label={row.direction === 'in' ? 'Masuk' : 'Keluar'}
+                      tone={row.direction === 'in' ? 'good' : 'warn'}
+                    />
+                  }
+                  facts={[
+                    { label: 'Tanggal', value: row.date },
+                    { label: 'Kategori', value: row.category },
+                    {
+                      label: 'Jumlah',
+                      value: `${row.direction === 'in' ? '+' : '−'}${formatIdr(row.amount)}`,
+                    },
+                    { label: 'Saldo', value: formatIdr(row.balance) },
+                  ]}
+                  onClick={() => setDetail(row)}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh

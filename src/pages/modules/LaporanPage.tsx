@@ -4,6 +4,8 @@ import { FinanceToast } from '@/components/keuangan/FinanceToast'
 import { StatusPill } from '@/components/keuangan/StatusPill'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceTable,
   FinanceTd,
   FinanceTh,
@@ -111,6 +113,32 @@ export function LaporanPage() {
     .reduce((s, e) => s + e.amount, 0)
   const cashBal = cashEntries[0]?.balance ?? 0
   const low = stocks.filter(isLowStock)
+
+  const agingRows = useMemo(
+    () => [
+      ...payables
+        .filter((p) => p.paid < p.amount)
+        .map((p) => ({
+          kind: 'Utang' as const,
+          party: p.supplier,
+          invoice: p.invoice,
+          sisa: p.amount - p.paid,
+          aging: p.agingDays,
+          status: p.status,
+        })),
+      ...receivables
+        .filter((r) => r.paid < r.amount)
+        .map((r) => ({
+          kind: 'Piutang' as const,
+          party: r.customer,
+          invoice: r.invoice,
+          sisa: r.amount - r.paid,
+          aging: r.agingDays,
+          status: r.status,
+        })),
+    ],
+    [payables, receivables],
+  )
 
   const purchaseByLotId = useMemo(() => {
     const map = new Map<string, (typeof purchases)[number]>()
@@ -345,7 +373,32 @@ export function LaporanPage() {
         ) : null}
 
         {tab === 'aging' ? (
-          <FinanceTable>
+          <FinanceTable
+            mobileCards={
+              agingRows.length === 0 ? (
+                <FinanceListEmpty message="Tidak ada utang/piutang terbuka." />
+              ) : (
+                agingRows.map((row) => (
+                  <FinanceListCard
+                    key={`${row.kind}-${row.invoice}`}
+                    title={row.invoice}
+                    subtitle={row.party}
+                    badges={
+                      <StatusPill
+                        label={row.status}
+                        tone={row.status === 'overdue' ? 'danger' : 'warn'}
+                      />
+                    }
+                    facts={[
+                      { label: 'Jenis', value: row.kind },
+                      { label: 'Sisa', value: idr(row.sisa) },
+                      { label: 'Aging', value: `${row.aging}h` },
+                    ]}
+                  />
+                ))
+              )
+            }
+          >
             <FinanceThead>
               <FinanceTh>Jenis</FinanceTh>
               <FinanceTh>Mitra</FinanceTh>
@@ -355,28 +408,7 @@ export function LaporanPage() {
               <FinanceTh>Status</FinanceTh>
             </FinanceThead>
             <tbody>
-              {[
-                ...payables
-                  .filter((p) => p.paid < p.amount)
-                  .map((p) => ({
-                    kind: 'Utang',
-                    party: p.supplier,
-                    invoice: p.invoice,
-                    sisa: p.amount - p.paid,
-                    aging: p.agingDays,
-                    status: p.status,
-                  })),
-                ...receivables
-                  .filter((r) => r.paid < r.amount)
-                  .map((r) => ({
-                    kind: 'Piutang',
-                    party: r.customer,
-                    invoice: r.invoice,
-                    sisa: r.amount - r.paid,
-                    aging: r.agingDays,
-                    status: r.status,
-                  })),
-              ].map((row) => (
+              {agingRows.map((row) => (
                 <FinanceTr key={`${row.kind}-${row.invoice}`}>
                   <FinanceTd>{row.kind}</FinanceTd>
                   <FinanceTd>{row.party}</FinanceTd>
@@ -396,7 +428,26 @@ export function LaporanPage() {
         ) : null}
 
         {tab === 'stok' ? (
-          <FinanceTable>
+          <FinanceTable
+            mobileCards={
+              low.length === 0 ? (
+                <FinanceListEmpty message="Tidak ada stok rendah." />
+              ) : (
+                low.map((s) => (
+                  <FinanceListCard
+                    key={`${s.sku}-${s.location}`}
+                    title={s.name}
+                    subtitle={s.sku}
+                    facts={[
+                      { label: 'Lokasi', value: s.location },
+                      { label: 'Qty', value: `${s.qty} ${s.unit}` },
+                      { label: 'Min', value: s.minQty },
+                    ]}
+                  />
+                ))
+              )
+            }
+          >
             <FinanceThead>
               <FinanceTh>SKU</FinanceTh>
               <FinanceTh>Nama</FinanceTh>
@@ -428,7 +479,29 @@ export function LaporanPage() {
           <div className="space-y-6">
             <div>
               <h3 className="mb-2 text-[13px] font-semibold text-ink">Rendemen batch</h3>
-              <FinanceTable>
+              <FinanceTable
+                mobileCards={batches.map((b) => {
+                  const act = actualRendemen(b)
+                  const d = act - b.targetRendemen
+                  return (
+                    <FinanceListCard
+                      key={b.id}
+                      title={b.id}
+                      subtitle={b.stage}
+                      badges={
+                        <StatusPill
+                          label={`${d >= 0 ? '+' : ''}${d.toFixed(1)}`}
+                          tone={d >= 0 ? 'good' : 'warn'}
+                        />
+                      }
+                      facts={[
+                        { label: 'Target', value: `${b.targetRendemen.toFixed(1)}%` },
+                        { label: 'Aktual', value: `${act.toFixed(1)}%` },
+                      ]}
+                    />
+                  )
+                })}
+              >
                 <FinanceThead>
                   <FinanceTh>Batch</FinanceTh>
                   <FinanceTh>Target</FinanceTh>
@@ -466,7 +539,58 @@ export function LaporanPage() {
               <p className="mb-2 text-[12px] text-muted">
                 Snapshot biaya/kg beras terakhir per lot (gabah + alokasi ops)
               </p>
-              <FinanceTable>
+              <FinanceTable
+                mobileCards={
+                  costingRows.length === 0 ? (
+                    <FinanceListEmpty message="Belum ada snapshot costing. Selesaikan batch atau hitung ulang di Rendemen." />
+                  ) : (
+                    costingRows.map((row) => {
+                      const batch = batchById.get(row.batchId)
+                      const purchase = purchaseByLotId.get(row.lotId)
+                      const act = batch ? actualRendemen(batch) : null
+                      return (
+                        <FinanceListCard
+                          key={`${row.lotId}-${row.batchId}-${row.at}`}
+                          title={row.lotId}
+                          subtitle={row.batchId}
+                          facts={[
+                            {
+                              label: 'PO / pemasok',
+                              value: purchase
+                                ? `${purchase.id} · ${getSupplier(purchase.supplierId)?.name ?? '—'}`
+                                : '—',
+                            },
+                            {
+                              label: 'Rendemen',
+                              value: act != null ? `${act.toFixed(1)}%` : '—',
+                            },
+                            {
+                              label: 'Cost/kg',
+                              value:
+                                row.costPerKgBeras > 0
+                                  ? formatRupiah(row.costPerKgBeras)
+                                  : '—',
+                            },
+                            {
+                              label: 'Nilai gabah',
+                              value: formatRupiah(row.grainValue),
+                            },
+                            {
+                              label: 'Alokasi ops',
+                              value: formatRupiah(row.allocatedOps),
+                            },
+                            {
+                              label: 'Metode',
+                              value:
+                                row.method === 'manual' ? 'Manual' : 'Proporsional',
+                            },
+                          ]}
+                        />
+                      )
+                    })
+                  )
+                }
+              >
                 <FinanceThead>
                   <FinanceTh>Lot</FinanceTh>
                   <FinanceTh>Batch</FinanceTh>
@@ -532,7 +656,25 @@ export function LaporanPage() {
             <p className="mb-2 text-[12px] text-muted">
               Dari jurnal non-void; saldo per akun postable aktif.
             </p>
-            <FinanceTable>
+            <FinanceTable
+              mobileCards={
+                trialRows.rows.length === 0 ? (
+                  <FinanceListEmpty message="Belum ada akun postable." />
+                ) : (
+                  trialRows.rows.map(({ acc, debit, credit }) => (
+                    <FinanceListCard
+                      key={acc.id}
+                      title={acc.code}
+                      subtitle={acc.name}
+                      facts={[
+                        { label: 'Debit', value: debit > 0 ? idr(debit) : '—' },
+                        { label: 'Kredit', value: credit > 0 ? idr(credit) : '—' },
+                      ]}
+                    />
+                  ))
+                )
+              }
+            >
               <FinanceThead>
                 <FinanceTh>Kode</FinanceTh>
                 <FinanceTh>Akun</FinanceTh>
@@ -578,7 +720,22 @@ export function LaporanPage() {
             </p>
             <div>
               <h3 className="mb-2 text-[13px] font-semibold text-ink">Pendapatan</h3>
-              <FinanceTable>
+              <FinanceTable
+                mobileCards={
+                  plReport.revenue.length === 0 ? (
+                    <FinanceListEmpty message="Belum ada saldo pendapatan." />
+                  ) : (
+                    plReport.revenue.map(({ acc, amount }) => (
+                      <FinanceListCard
+                        key={acc.id}
+                        title={acc.code}
+                        subtitle={acc.name}
+                        facts={[{ label: 'Jumlah', value: idr(amount) }]}
+                      />
+                    ))
+                  )
+                }
+              >
                 <FinanceThead>
                   <FinanceTh>Kode</FinanceTh>
                   <FinanceTh>Akun</FinanceTh>
@@ -609,7 +766,22 @@ export function LaporanPage() {
             </div>
             <div>
               <h3 className="mb-2 text-[13px] font-semibold text-ink">Beban</h3>
-              <FinanceTable>
+              <FinanceTable
+                mobileCards={
+                  plReport.expense.length === 0 ? (
+                    <FinanceListEmpty message="Belum ada saldo beban." />
+                  ) : (
+                    plReport.expense.map(({ acc, amount }) => (
+                      <FinanceListCard
+                        key={acc.id}
+                        title={acc.code}
+                        subtitle={acc.name}
+                        facts={[{ label: 'Jumlah', value: idr(amount) }]}
+                      />
+                    ))
+                  )
+                }
+              >
                 <FinanceThead>
                   <FinanceTh>Kode</FinanceTh>
                   <FinanceTh>Akun</FinanceTh>
@@ -655,7 +827,22 @@ export function LaporanPage() {
             <div className="grid gap-4 lg:grid-cols-2">
               <div>
                 <h3 className="mb-2 text-[13px] font-semibold text-ink">Aset</h3>
-                <FinanceTable>
+                <FinanceTable
+                  mobileCards={
+                    balanceSheet.assets.length === 0 ? (
+                      <FinanceListEmpty message="—" />
+                    ) : (
+                      balanceSheet.assets.map(({ acc, amount }) => (
+                        <FinanceListCard
+                          key={acc.id}
+                          title={acc.name}
+                          subtitle={acc.code}
+                          facts={[{ label: 'Saldo', value: idr(amount) }]}
+                        />
+                      ))
+                    )
+                  }
+                >
                   <FinanceThead>
                     <FinanceTh>Akun</FinanceTh>
                     <FinanceTh>Saldo</FinanceTh>
@@ -688,7 +875,22 @@ export function LaporanPage() {
               <div className="space-y-4">
                 <div>
                   <h3 className="mb-2 text-[13px] font-semibold text-ink">Utang</h3>
-                  <FinanceTable>
+                  <FinanceTable
+                    mobileCards={
+                      balanceSheet.liabilities.length === 0 ? (
+                        <FinanceListEmpty message="—" />
+                      ) : (
+                        balanceSheet.liabilities.map(({ acc, amount }) => (
+                          <FinanceListCard
+                            key={acc.id}
+                            title={acc.name}
+                            subtitle={acc.code}
+                            facts={[{ label: 'Saldo', value: idr(amount) }]}
+                          />
+                        ))
+                      )
+                    }
+                  >
                     <FinanceThead>
                       <FinanceTh>Akun</FinanceTh>
                       <FinanceTh>Saldo</FinanceTh>
@@ -722,7 +924,28 @@ export function LaporanPage() {
                 </div>
                 <div>
                   <h3 className="mb-2 text-[13px] font-semibold text-ink">Ekuitas</h3>
-                  <FinanceTable>
+                  <FinanceTable
+                    mobileCards={[
+                      ...balanceSheet.equity.map(({ acc, amount }) => (
+                        <FinanceListCard
+                          key={acc.id}
+                          title={acc.name}
+                          subtitle={acc.code}
+                          facts={[{ label: 'Saldo', value: idr(amount) }]}
+                        />
+                      )),
+                      <FinanceListCard
+                        key="net-income"
+                        title="Laba (rugi) berjalan"
+                        facts={[
+                          {
+                            label: 'Saldo',
+                            value: idr(balanceSheet.netIncome),
+                          },
+                        ]}
+                      />,
+                    ]}
+                  >
                     <FinanceThead>
                       <FinanceTh>Akun</FinanceTh>
                       <FinanceTh>Saldo</FinanceTh>

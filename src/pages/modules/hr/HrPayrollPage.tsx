@@ -4,6 +4,8 @@ import { FinanceFilterBar } from '@/components/keuangan/FinanceFilterBar'
 import { FinancePager } from '@/components/keuangan/FinancePager'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -148,7 +150,56 @@ export function HrPayrollPage() {
           }
           actions={<FinanceToast message={toast} />}
         >
-          <FinanceTable minWidth="780px">
+          <FinanceTable
+            minWidth="780px"
+            mobileCards={queue.map((run) => (
+              <FinanceListCard
+                key={run.id}
+                title={run.id}
+                subtitle={run.period}
+                badges={
+                  <StatusPill
+                    label={PAYROLL_STATUS_LABEL[run.status]}
+                    tone="warn"
+                  />
+                }
+                facts={[{ label: 'Total', value: formatIdr(runTotal(run)) }]}
+                action={
+                  <div className="flex flex-col gap-1">
+                    <button
+                      type="button"
+                      className="text-left text-[12px] font-medium text-brand-800 hover:underline"
+                      onClick={() => {
+                        const err =
+                          user.role === 'hr'
+                            ? approveAsHr(run.id)
+                            : approveAsAdmin(run.id)
+                        setToast(err ?? 'Approve tercatat')
+                      }}
+                    >
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      className="text-left text-[12px] font-medium text-red-700 hover:underline"
+                      onClick={() => {
+                        setRejectError(undefined)
+                        setRejectId(run.id)
+                      }}
+                    >
+                      Tolak
+                    </button>
+                    <Link
+                      to={`/app/keuangan/payroll?dok=${encodeURIComponent(run.id)}`}
+                      className="text-[12px] font-medium text-brand-800 hover:underline"
+                    >
+                      Detail
+                    </Link>
+                  </div>
+                }
+              />
+            ))}
+          >
             <FinanceThead>
               <FinanceTh className="w-12">No</FinanceTh>
               <FinanceTh>ID</FinanceTh>
@@ -264,7 +315,51 @@ export function HrPayrollPage() {
           />
         </div>
 
-        <FinanceTable minWidth="780px">
+        <FinanceTable
+          minWidth="780px"
+          mobileCards={
+            list.length === 0 ? (
+              <FinanceListEmpty message="Belum ada run payroll." />
+            ) : (
+              list.map((run) => (
+                <FinanceListCard
+                  key={run.id}
+                  title={run.id}
+                  subtitle={run.period}
+                  badges={
+                    <StatusPill
+                      label={PAYROLL_STATUS_LABEL[run.status]}
+                      tone={toneFor(run.status)}
+                    />
+                  }
+                  facts={[{ label: 'Total', value: formatIdr(runTotal(run)) }]}
+                  action={
+                    <div className="flex flex-col gap-1">
+                      <Link
+                        to={`/app/keuangan/payroll?dok=${encodeURIComponent(run.id)}`}
+                        className="text-[12px] font-medium text-brand-800 hover:underline"
+                      >
+                        Buka
+                      </Link>
+                      {run.status === 'draft' && user.role === 'hr' ? (
+                        <button
+                          type="button"
+                          className="text-left text-[12px] font-medium text-brand-800 hover:underline"
+                          onClick={() => {
+                            const err = submitForApproval(run.id)
+                            setToast(err ?? 'Diajukan ke antrian HR')
+                          }}
+                        >
+                          Ajukan
+                        </button>
+                      ) : null}
+                    </div>
+                  }
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh

@@ -4,6 +4,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -211,7 +213,42 @@ export function QcPage() {
           }}
         />
 
-        <FinanceTable minWidth="920px">
+        <FinanceTable
+          minWidth="920px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Belum ada lot. Lot terbit saat hasil timbang disimpan." />
+            ) : (
+              rows.map((purchase) => {
+                const qc = getLotQc(lotQc, purchase.lotId!)
+                const supplier = getSupplier(purchase.supplierId)
+                return (
+                  <FinanceListCard
+                    key={purchase.id}
+                    title={purchase.lotId ?? purchase.id}
+                    subtitle={`${purchase.id} · ${supplier?.name ?? '—'}`}
+                    badges={
+                      <StatusPill label={qcLabel(qc)} tone={qcTone(qc)} />
+                    }
+                    facts={[
+                      { label: 'Gabah', value: purchase.grain },
+                      {
+                        label: 'KA',
+                        value: qc ? `${formatNumber(qc.moisture)}%` : '—',
+                      },
+                      {
+                        label: 'Kotoran',
+                        value: qc ? `${formatNumber(qc.impurity)}%` : '—',
+                      },
+                      { label: 'Grade', value: qc?.grade ?? '—' },
+                    ]}
+                    onClick={() => setOpenId(purchase.id)}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh label="Lot" sortKey="lot" sort={sort} onSort={handleSort} />

@@ -9,6 +9,8 @@ import {
 } from '@/components/keuangan/ReceiptUpload'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -279,7 +281,47 @@ export function TagihanView({ orders, selectedId, onSelect, onPay }: TagihanView
           }}
         />
 
-        <FinanceTable minWidth="840px">
+        <FinanceTable
+          minWidth="840px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada tagihan yang cocok." />
+            ) : (
+              rows.map(({ o, s }) => (
+                <FinanceListCard
+                  key={o.id}
+                  title={o.id}
+                  subtitle={getCustomer(o.customerId)?.name}
+                  badges={
+                    s.payment ? (
+                      <StatusPill
+                        label={PAYMENT_STATUS_LABEL[s.payment]}
+                        tone={STATUS_TONE[s.payment]}
+                      />
+                    ) : undefined
+                  }
+                  facts={[
+                    {
+                      label: 'Jatuh tempo',
+                      value: o.dueDate ? formatDate(o.dueDate) : '—',
+                    },
+                    { label: 'Total', value: formatRupiah(s.total) },
+                    {
+                      label: 'Sisa',
+                      value:
+                        s.outstanding === 0 ? '—' : formatRupiah(s.outstanding),
+                    },
+                    { label: 'Qty', value: formatQty(o.qty, o.unit) },
+                  ]}
+                  onClick={() => {
+                    setDetail(o)
+                    onSelect(o.id)
+                  }}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh label="Dokumen" sortKey="id" sort={sort} onSort={handleSort} />

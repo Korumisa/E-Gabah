@@ -5,11 +5,14 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { TextField } from '@/components/ui/TextField'
 import { sanitizeText } from '@/features/master/input-safety'
 import {
+  hydrateOrgStructure,
+  pushOrgStructure,
+} from '@/features/master/org-structure-cloud'
+import {
   ORG_LIST_META,
   readOrgStructure,
   subscribeOrgStructure,
   systemRoles,
-  writeOrgStructure,
   type OrgListKind,
   type OrgStructure,
 } from '@/features/master/org-structure'
@@ -30,14 +33,22 @@ export function OrgStrukturPage() {
   useEffect(() => subscribeOrgStructure(() => setData(readOrgStructure())), [])
 
   useEffect(() => {
+    void hydrateOrgStructure()
+      .then(() => setData(readOrgStructure()))
+      .catch(() => undefined)
+  }, [])
+
+  useEffect(() => {
     if (!toast) return
     const t = window.setTimeout(() => setToast(null), 2800)
     return () => window.clearTimeout(t)
   }, [toast])
 
-  function persist(next: OrgStructure, message: string) {
-    setData(writeOrgStructure(next))
-    setToast(message)
+  async function persist(next: OrgStructure, message: string) {
+    setData(next)
+    const err = await pushOrgStructure(next)
+    setData(readOrgStructure())
+    setToast(err ?? message)
   }
 
   function addItem(kind: OrgListKind) {
@@ -52,14 +63,14 @@ export function OrgStrukturPage() {
     }
     setErrors((e) => ({ ...e, [kind]: undefined }))
     setDrafts((d) => ({ ...d, [kind]: '' }))
-    persist(
+    void persist(
       { ...data, [kind]: [...data[kind], value] },
       `${ORG_LIST_META[kind].label} ditambahkan`,
     )
   }
 
   function removeItem(kind: OrgListKind, value: string) {
-    persist(
+    void persist(
       { ...data, [kind]: data[kind].filter((x) => x !== value) },
       `${ORG_LIST_META[kind].label} dihapus`,
     )

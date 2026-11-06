@@ -4,6 +4,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -226,7 +228,35 @@ export function BatchView({
           onFilterChange={setFilter}
         />
 
-        <FinanceTable>
+        <FinanceTable
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada batch." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.id}
+                  subtitle={row.inputName}
+                  badges={<StageLabel stage={row.stage} />}
+                  facts={[
+                    { label: 'Tanggal', value: formatDate(row.date) },
+                    { label: 'Operator', value: row.operator },
+                    {
+                      label: 'Input',
+                      value: formatQty(row.inputQty, row.inputUnit),
+                    },
+                    {
+                      label: 'Rendemen',
+                      value: `${actualRendemen(row).toFixed(1)}%`,
+                    },
+                  ]}
+                  onClick={() => openDetail(row)}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-10">#</FinanceTh>
             <FinanceSortTh label="Batch" sortKey="id" sort={sort} onSort={handleSort} />

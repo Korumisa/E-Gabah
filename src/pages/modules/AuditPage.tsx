@@ -3,6 +3,8 @@ import { FinanceFilterBar } from '@/components/keuangan/FinanceFilterBar'
 import { FinancePager } from '@/components/keuangan/FinancePager'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceTable,
   FinanceTd,
   FinanceTh,
@@ -95,7 +97,27 @@ export function AuditPage() {
           }}
         />
 
-        <FinanceTable>
+        <FinanceTable
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Belum ada log." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.actor}
+                  subtitle={new Date(row.at).toLocaleString('id-ID')}
+                  badges={<StatusPill label={row.action} tone="neutral" />}
+                  facts={[
+                    { label: 'Entitas', value: row.entity },
+                    { label: 'ID', value: row.entityId },
+                    { label: 'Catatan', value: row.note || '—' },
+                  ]}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-10">#</FinanceTh>
             <FinanceTh>Waktu</FinanceTh>

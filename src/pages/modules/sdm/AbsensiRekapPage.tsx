@@ -17,6 +17,8 @@ import { PageSection } from '@/components/ui/PageSection'
 import {
   ActorCell,
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -208,7 +210,41 @@ export function AbsensiRekapPage() {
           }}
         />
 
-        <FinanceTable minWidth="780px">
+        <FinanceTable
+          minWidth="780px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada data absensi pada tanggal ini." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.userName}
+                  badges={
+                    <StatusPill
+                      label={ATTENDANCE_STATUS_LABEL[row.status]}
+                      tone={
+                        row.status === 'hadir'
+                          ? 'good'
+                          : row.status === 'terlambat'
+                            ? 'warn'
+                            : 'danger'
+                      }
+                    />
+                  }
+                  facts={[
+                    { label: 'Masuk', value: formatClock(row.checkIn) },
+                    { label: 'Keluar', value: formatClock(row.checkOut) },
+                    {
+                      label: 'Koordinat masuk',
+                      value: <AbsensiLokasiCell geo={row.checkInGeo} />,
+                    },
+                  ]}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh

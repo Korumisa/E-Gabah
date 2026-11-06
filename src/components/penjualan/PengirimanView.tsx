@@ -10,6 +10,8 @@ import {
 } from '@/components/keuangan/ReceiptUpload'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -359,7 +361,40 @@ export function PengirimanView({
           }}
         />
 
-        <FinanceTable minWidth="780px">
+        <FinanceTable
+          minWidth="780px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada order yang cocok." />
+            ) : (
+              rows.map((o) => {
+                const customer = getCustomer(o.customerId)
+                const s = summarize(o)
+                const dateShow = o.delivery?.shippedAt ?? o.date
+                return (
+                  <FinanceListCard
+                    key={o.id}
+                    title={o.id}
+                    subtitle={customer?.name}
+                    badges={
+                      <StatusPill
+                        label={STAGE_LABEL[o.stage]}
+                        tone={o.stage === 'dikirim' ? 'good' : 'neutral'}
+                      />
+                    }
+                    facts={[
+                      { label: 'Produk', value: o.productName },
+                      { label: 'Tanggal', value: formatDate(dateShow) },
+                      { label: 'Nilai', value: formatRupiah(s.total) },
+                      { label: 'Qty', value: formatQty(o.qty, o.unit) },
+                    ]}
+                    onClick={() => setDetail(o)}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh label="Dokumen" sortKey="id" sort={sort} onSort={handleSort} />

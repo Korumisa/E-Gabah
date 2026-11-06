@@ -5,6 +5,8 @@ import {
 } from '@/components/keuangan/FinanceModal'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceTable,
   FinanceTd,
   FinanceTh,
@@ -313,7 +315,106 @@ export function RekonBankPage() {
               </button>
             </div>
 
-            <FinanceTable>
+            <FinanceTable
+              mobileCards={
+                sessionLines.length === 0 ? (
+                  <FinanceListEmpty message="Belum ada baris — import CSV" />
+                ) : (
+                  sessionLines.map((line) => (
+                    <FinanceListCard
+                      key={line.id}
+                      title={line.date}
+                      subtitle={line.memo}
+                      badges={
+                        <StatusPill
+                          label={LINE_STATUS_LABEL[line.status]}
+                          tone={LINE_STATUS_TONE[line.status]}
+                        />
+                      }
+                      facts={[
+                        { label: 'Jumlah', value: formatIdr(line.amount) },
+                        ...(line.bankRef
+                          ? [{ label: 'Ref bank', value: line.bankRef }]
+                          : []),
+                        ...(line.suggestedCashEntryId
+                          ? [
+                              {
+                                label: 'Saran kas',
+                                value: line.suggestedCashEntryId,
+                              },
+                            ]
+                          : []),
+                        ...(line.cashEntryId
+                          ? [{ label: 'Kas', value: line.cashEntryId }]
+                          : []),
+                      ]}
+                      action={
+                        <div className="flex max-w-[140px] flex-col gap-1">
+                          {line.status === 'unmatched' &&
+                          line.suggestedCashEntryId ? (
+                            <>
+                              <button
+                                type="button"
+                                className="text-left text-[11px] text-brand-800 underline"
+                                onClick={() => {
+                                  const err = acceptSuggestion(line.id)
+                                  setToast(err ?? 'Saran diterima')
+                                }}
+                              >
+                                Terima saran
+                              </button>
+                              <button
+                                type="button"
+                                className="text-left text-[11px] text-muted underline"
+                                onClick={() => rejectSuggestion(line.id)}
+                              >
+                                Tolak saran
+                              </button>
+                            </>
+                          ) : null}
+                          {line.status === 'unmatched' ? (
+                            <>
+                              <button
+                                type="button"
+                                className="text-left text-[11px] underline"
+                                onClick={() => {
+                                  setManualLineId(line.id)
+                                  setManualCashId('')
+                                }}
+                              >
+                                Match manual
+                              </button>
+                              <button
+                                type="button"
+                                className="text-left text-[11px] text-muted underline"
+                                onClick={() => ignoreLine(line.id)}
+                              >
+                                Abaikan
+                              </button>
+                              <button
+                                type="button"
+                                className="text-left text-[11px] text-amber-800 underline"
+                                onClick={() => {
+                                  const err = postAdjustment(line.id, {
+                                    memo: line.memo,
+                                  })
+                                  setToast(
+                                    err ??
+                                      'Penyesuaian JE diposting (GL-only)',
+                                  )
+                                }}
+                              >
+                                Post penyesuaian
+                              </button>
+                            </>
+                          ) : null}
+                        </div>
+                      }
+                    />
+                  ))
+                )
+              }
+            >
               <FinanceThead>
                 <tr>
                   <FinanceTh>Tanggal</FinanceTh>

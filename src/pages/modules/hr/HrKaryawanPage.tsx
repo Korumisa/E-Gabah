@@ -5,6 +5,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import {
   ActorCell,
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -99,7 +101,31 @@ export function HrKaryawanPage() {
           }}
         />
 
-        <FinanceTable minWidth="720px">
+        <FinanceTable
+          minWidth="720px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada karyawan." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.name}
+                  subtitle={row.email}
+                  badges={
+                    <StatusPill
+                      label={row.active ? 'Aktif' : 'Nonaktif'}
+                      tone={row.active ? 'good' : 'muted'}
+                    />
+                  }
+                  facts={[
+                    { label: 'Peran', value: ROLE_LABELS[row.role] ?? row.role },
+                  ]}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh

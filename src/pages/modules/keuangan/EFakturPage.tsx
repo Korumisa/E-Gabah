@@ -7,6 +7,8 @@ import {
 import { FinancePager } from '@/components/keuangan/FinancePager'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -283,7 +285,35 @@ export function EFakturPage() {
           onAction={exportCsv}
         />
 
-        <FinanceTable minWidth="880px">
+        <FinanceTable
+          minWidth="880px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Belum ada faktur pajak yang cocok." />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.number}
+                  subtitle={formatInvoiceDate(row.date)}
+                  badges={
+                    <StatusPill
+                      label={STATUS_LABEL[row.status]}
+                      tone={STATUS_TONE[row.status]}
+                    />
+                  }
+                  facts={[
+                    { label: 'Lawan transaksi', value: row.partyName ?? '—' },
+                    { label: 'DPP', value: formatIdr(row.dpp) },
+                    { label: 'PPN', value: formatIdr(row.ppn) },
+                    { label: 'Total', value: formatIdr(row.total) },
+                  ]}
+                  onClick={() => setDetail(row)}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh

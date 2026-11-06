@@ -10,6 +10,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceTable,
   FinanceTd,
   FinanceTh,
@@ -246,7 +248,49 @@ export function PiutangPage() {
           }}
         />
 
-        <FinanceTable minWidth="800px">
+        <FinanceTable
+          minWidth="800px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty
+                message={
+                  receivables.length === 0
+                    ? 'Belum ada piutang. Muncul setelah penjualan diposting.'
+                    : 'Tidak ada piutang yang cocok dengan filter.'
+                }
+              />
+            ) : (
+              rows.map((row) => {
+                const sisa = row.amount - row.paid
+                return (
+                  <FinanceListCard
+                    key={row.id}
+                    title={row.invoice}
+                    subtitle={row.customer}
+                    badges={
+                      <StatusPill
+                        label={RECEIVABLE_STATUS_LABEL[row.status]}
+                        tone={STATUS_TONE[row.status]}
+                      />
+                    }
+                    facts={[
+                      {
+                        label: 'Jatuh tempo',
+                        value:
+                          row.agingDays > 0
+                            ? `${row.dueDate} (+${row.agingDays} hari)`
+                            : row.dueDate,
+                      },
+                      { label: 'Nilai', value: formatIdr(row.amount) },
+                      { label: 'Sisa', value: formatIdr(sisa) },
+                    ]}
+                    onClick={() => setDetail(row)}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh

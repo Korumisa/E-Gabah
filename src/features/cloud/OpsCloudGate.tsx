@@ -10,6 +10,7 @@ import {
   clearCloudPersistError,
   subscribeCloudPersistError,
 } from '@/lib/cloud-persist-bus'
+import { hydrateOrgStructure } from '@/features/master/org-structure-cloud'
 import { hydrateAppSettings } from '@/features/settings/settings-cloud'
 
 function isPortalPath(pathname: string) {
@@ -36,6 +37,7 @@ export function OpsCloudGate({ children }: { children: ReactNode }) {
     const [{ failed }] = await Promise.all([
       hydrateRelationalTables(ALL_RELATIONAL_HYDRATE_SPECS),
       hydrateAppSettings().catch(() => undefined),
+      hydrateOrgStructure().catch(() => undefined),
     ])
     if (failed.length) {
       setReady(false)

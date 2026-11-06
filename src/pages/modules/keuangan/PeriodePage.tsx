@@ -7,6 +7,8 @@ import {
 } from '@/components/keuangan/FinanceModal'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceTable,
   FinanceTd,
   FinanceTh,
@@ -401,7 +403,43 @@ export function PeriodePage() {
           </p>
         )}
 
-        <FinanceTable>
+        <FinanceTable
+          mobileCards={
+            sortedLocks.length === 0 ? (
+              <FinanceListEmpty message="Belum ada kunci periode" />
+            ) : (
+              sortedLocks.map((lock) => {
+                const pending = pendingByLockId.get(lock.id)
+                return (
+                  <FinanceListCard
+                    key={lock.id}
+                    title={lockLabel(lock)}
+                    subtitle={`${lock.startDate} → ${lock.endDate}`}
+                    badges={
+                      <>
+                        <StatusPill
+                          label={lock.active ? 'Aktif' : 'Nonaktif'}
+                          tone={lock.active ? 'warn' : 'muted'}
+                        />
+                        {pending ? (
+                          <StatusPill label="Unlock pending" tone="neutral" />
+                        ) : null}
+                      </>
+                    }
+                    facts={[
+                      {
+                        label: 'Dikunci',
+                        value: formatIsoDisplay(lock.lockedAt),
+                      },
+                      { label: 'Oleh', value: lock.lockedBy },
+                    ]}
+                    onClick={() => setDetailLock(lock)}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <tr>
               <FinanceTh className="w-10">#</FinanceTh>

@@ -262,32 +262,36 @@ rows.push(
   need(
     20,
     'Portal: non-HR role does not see E-HR card',
-    'Browser login as beli@ / kas@ and inspect /portal',
+    'Automate: npm run e2e:need-live (demo). Manual: login beli@ / kas@ → /portal',
   ),
 )
 rows.push(
   need(
     21,
     'Check-in with GPS writes lat/lng and shows pin + lokasi cell',
-    'Browser + geolocation permission on /absensi',
+    'Browser + geolocation permission on /absensi (masih manual)',
   ),
 )
 rows.push(
   need(
     22,
     'Cloud migrations applied (no PGRST205/204 on absensi/leave)',
-    'Live Supabase + check-in / leave submit',
+    'Live Supabase + check-in / leave submit (masih manual / DATABASE_URL smoke)',
   ),
 )
 rows.push(
   need(
     23,
     'Payroll stamp sequence HR→admin→keuangan cannot cross-stamp',
-    'Multi-role browser or store unit drive',
+    'Multi-role browser or store unit drive (masih manual)',
   ),
 )
 rows.push(
-  need(24, 'Mobile filter bar layout', 'Resize browser <640px on /hr and /absensi'),
+  need(
+    24,
+    'Mobile filter bar layout',
+    'Automate: npm run e2e:need-live. Manual: resize <640px on /hr and /absensi',
+  ),
 )
 
 const pass = rows.filter((r) => r.status === 'PASS').length

@@ -5,6 +5,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -293,7 +295,48 @@ export function ReturPage() {
           }
         />
 
-        <FinanceTable minWidth="860px">
+        <FinanceTable
+          minWidth="860px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Belum ada retur yang cocok." />
+            ) : (
+              rows.map((row) => {
+                const order = orders.find((o) => o.id === row.orderId)
+                const customer = order ? getCustomer(order.customerId) : undefined
+                return (
+                  <FinanceListCard
+                    key={row.id}
+                    title={row.id}
+                    subtitle={`${row.orderId} · ${customer?.name ?? '—'}`}
+                    badges={
+                      <StatusPill
+                        label={RETURN_STAGE_LABEL[row.stage]}
+                        tone={stageTone(row.stage)}
+                      />
+                    }
+                    facts={[
+                      {
+                        label: 'Qty',
+                        value: formatQty(lineQty(row), row.lines[0]?.unit ?? 'kg'),
+                      },
+                      {
+                        label: 'Tanggal',
+                        value: formatDate(dateKey(row.createdAt)),
+                      },
+                      { label: 'Order', value: row.orderId },
+                      { label: 'Pelanggan', value: customer?.name ?? '—' },
+                    ]}
+                    onClick={() => {
+                      setCreating(false)
+                      openDok(row.id)
+                    }}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh label="Retur" sortKey="id" sort={sort} onSort={handleSort} />

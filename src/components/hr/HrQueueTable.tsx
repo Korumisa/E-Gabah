@@ -5,6 +5,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import {
   ActorCell,
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -180,7 +182,34 @@ export function HrQueueTable({
         }}
       />
 
-      <FinanceTable minWidth="720px">
+      <FinanceTable
+        minWidth="720px"
+        mobileCards={
+          rows.length === 0 ? (
+            <FinanceListEmpty message="Tidak ada item di antrian untuk filter ini." />
+          ) : (
+            rows.map((row) => (
+              <FinanceListCard
+                key={row.id}
+                title={row.title}
+                subtitle={row.detail}
+                badges={
+                  <StatusPill label={row.statusLabel} tone={row.tone} />
+                }
+                facts={[{ label: 'Jenis', value: row.kindLabel }]}
+                action={
+                  <Link
+                    to={row.href}
+                    className="text-[12px] font-medium text-brand-800 hover:underline"
+                  >
+                    Buka
+                  </Link>
+                }
+              />
+            ))
+          )
+        }
+      >
         <FinanceThead>
           <FinanceTh className="w-12">No</FinanceTh>
           <FinanceSortTh

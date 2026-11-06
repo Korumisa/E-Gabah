@@ -4,6 +4,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceTable,
   FinanceTd,
   FinanceTh,
@@ -161,7 +163,40 @@ export function InputOutputView({
           onFilterChange={() => undefined}
         />
 
-        <FinanceTable>
+        <FinanceTable
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada data." />
+            ) : (
+              rows.map((row) => {
+                const bal = massBalance(row)
+                return (
+                  <FinanceListCard
+                    key={row.id}
+                    title={row.id}
+                    subtitle={formatDate(row.date)}
+                    badges={<StageLabel stage={row.stage} />}
+                    facts={[
+                      {
+                        label: 'Input',
+                        value: formatQty(row.inputQty, row.inputUnit),
+                      },
+                      {
+                        label: 'Σ Output',
+                        value: formatQty(sumOutputs(row), 'kg'),
+                      },
+                      {
+                        label: 'Selisih',
+                        value: `${bal > 0 ? '+' : ''}${formatQty(bal, 'kg')}`,
+                      },
+                    ]}
+                    onClick={() => openDetail(row)}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-10">#</FinanceTh>
             <FinanceTh>Batch</FinanceTh>

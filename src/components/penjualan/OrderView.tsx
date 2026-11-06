@@ -4,6 +4,8 @@ import { FinancePager } from '@/components/keuangan/FinancePager'
 import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceSortTh,
   FinanceTable,
   FinanceTd,
@@ -213,7 +215,36 @@ export function OrderView({
           onAction={onCreate}
         />
 
-        <FinanceTable minWidth="820px">
+        <FinanceTable
+          minWidth="820px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty message="Tidak ada order yang cocok." />
+            ) : (
+              rows.map((o) => {
+                const s = summarize(o)
+                const customer = getCustomer(o.customerId)
+                return (
+                  <FinanceListCard
+                    key={o.id}
+                    title={o.id}
+                    subtitle={customer?.name}
+                    badges={
+                      <StatusPill label={STAGE_LABEL[o.stage]} tone={STAGE_TONE[o.stage]} />
+                    }
+                    facts={[
+                      { label: 'Produk', value: o.productName },
+                      { label: 'Tanggal', value: formatDate(o.date) },
+                      { label: 'Nilai', value: formatRupiah(s.total) },
+                      { label: 'Qty', value: formatQty(o.qty, o.unit) },
+                    ]}
+                    onClick={() => openDetail(o)}
+                  />
+                )
+              })
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh label="Dokumen" sortKey="id" sort={sort} onSort={handleSort} />

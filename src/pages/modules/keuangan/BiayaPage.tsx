@@ -10,6 +10,8 @@ import { FinanceStatGrid } from '@/components/keuangan/FinanceStatGrid'
 import {
   ActorCell,
   FinanceEmptyRow,
+  FinanceListCard,
+  FinanceListEmpty,
   FinanceTable,
   FinanceTd,
   FinanceTh,
@@ -302,7 +304,46 @@ export function BiayaPage() {
           onAction={openForm}
         />
 
-        <FinanceTable minWidth="760px">
+        <FinanceTable
+          minWidth="760px"
+          mobileCards={
+            rows.length === 0 ? (
+              <FinanceListEmpty
+                message={
+                  expenses.length === 0
+                    ? 'Belum ada biaya. Catat pengeluaran operasional pertama.'
+                    : 'Tidak ada biaya yang cocok dengan filter.'
+                }
+              />
+            ) : (
+              rows.map((row) => (
+                <FinanceListCard
+                  key={row.id}
+                  title={row.reference}
+                  subtitle={row.description}
+                  badges={
+                    <>
+                      <StatusPill label={row.category} tone="neutral" />
+                      <StatusPill
+                        label={EXPENSE_STATUS_LABEL[row.status]}
+                        tone={STATUS_TONE[row.status]}
+                      />
+                    </>
+                  }
+                  facts={[
+                    { label: 'Tanggal', value: row.date },
+                    {
+                      label: 'Jumlah',
+                      value: formatIdr(expenseDisplayAmount(row)),
+                    },
+                    { label: 'Oleh', value: row.actor },
+                  ]}
+                  onClick={() => setDetail(row)}
+                />
+              ))
+            )
+          }
+        >
           <FinanceThead>
             <FinanceTh className="w-12">No</FinanceTh>
             <FinanceSortTh
