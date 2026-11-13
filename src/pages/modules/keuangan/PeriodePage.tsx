@@ -231,7 +231,7 @@ export function PeriodePage() {
     }
     setUnlockTarget(null)
     setUnlockReason('')
-    setToast('Permintaan unlock dikirim')
+    setToast('Permintaan buka periode dikirim')
   }
 
   function stampNow(role: UserRole): { role: UserRole; by: string; at: string } {
@@ -263,7 +263,7 @@ export function PeriodePage() {
     }
     setRejectTarget(null)
     setRejectReason('')
-    setToast('Permintaan unlock ditolak')
+    setToast('Permintaan buka periode ditolak')
   }
 
   const manageLocks = canManageLocks(user?.role)
@@ -285,8 +285,8 @@ export function PeriodePage() {
           <div>
             <h2 className="text-[14px] font-semibold text-ink">Kunci periode</h2>
             <p className="mt-0.5 text-[12px] text-muted">
-              Tutup buku per bulan atau rentang — unlock membutuhkan persetujuan
-              role terdampak dan admin final
+              Tutup buku per bulan atau rentang. Buka periode butuh persetujuan
+              peran terdampak dan admin.
             </p>
           </div>
           <FinanceToast message={toast} />
@@ -308,7 +308,7 @@ export function PeriodePage() {
             },
             {
               id: 'unlock',
-              label: 'Unlock',
+              label: 'Buka periode',
               done: false,
               current: periodStep === 'unlock',
             },
@@ -321,7 +321,7 @@ export function PeriodePage() {
             tone={activeLockCount > 0 ? 'warn' : 'muted'}
           />
           <StatusPill
-            label={`Unlock pending: ${pendingUnlockCount}`}
+            label={`Menunggu buka: ${pendingUnlockCount}`}
             tone={pendingUnlockCount > 0 ? 'neutral' : 'muted'}
           />
           <StatusPill label={`Total kunci: ${sortedLocks.length}`} tone="good" />
@@ -399,7 +399,7 @@ export function PeriodePage() {
         ) : (
           <p className="mb-3 text-[12px] text-muted">
             Hanya admin atau keuangan yang dapat membuat kunci. Anda dapat
-            menyetujui unlock jika role Anda terdampak.
+            menyetujui buka periode jika peran Anda terdampak.
           </p>
         )}
 
@@ -422,7 +422,7 @@ export function PeriodePage() {
                           tone={lock.active ? 'warn' : 'muted'}
                         />
                         {pending ? (
-                          <StatusPill label="Unlock pending" tone="neutral" />
+                          <StatusPill label="Menunggu buka" tone="neutral" />
                         ) : null}
                       </>
                     }
@@ -472,7 +472,7 @@ export function PeriodePage() {
                       />
                       {pending ? (
                         <span className="ml-1 inline-block">
-                          <StatusPill label="Unlock pending" tone="neutral" />
+                          <StatusPill label="Menunggu buka" tone="neutral" />
                         </span>
                       ) : null}
                     </FinanceTd>
@@ -497,7 +497,7 @@ export function PeriodePage() {
                               setUnlockReason('')
                             }}
                           >
-                            Minta unlock
+                            Minta buka periode
                           </button>
                         ) : null}
                       </div>
@@ -513,7 +513,7 @@ export function PeriodePage() {
       {unlockRequests.some((r) => r.status === 'pending') ? (
         <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
           <h3 className="text-[13px] font-semibold text-ink">
-            Persetujuan unlock
+            Persetujuan buka periode
           </h3>
           <p className="mb-3 text-[12px] text-muted">
             Hanya role yang terdampak transaksi di periode yang diminta
@@ -623,14 +623,14 @@ export function PeriodePage() {
         >
           <p className="text-[12px] text-muted">
             Posting dengan tanggal di dalam periode ini akan diblokir hingga
-            unlock disetujui.
+            buka periode disetujui.
           </p>
         </FinanceModal>
       ) : null}
 
       {unlockTarget ? (
         <FinanceModal
-          title="Permintaan unlock"
+          title="Minta buka periode"
           onClose={() => setUnlockTarget(null)}
           footer={
             <ModalActions
@@ -642,7 +642,7 @@ export function PeriodePage() {
         >
           <TextAreaField
             id="unlock-reason"
-            label="Alasan unlock"
+            label="Alasan"
             value={unlockReason}
             onChange={setUnlockReason}
             rows={3}
@@ -652,7 +652,7 @@ export function PeriodePage() {
 
       {rejectTarget ? (
         <FinanceModal
-          title="Tolak permintaan unlock"
+          title="Tolak permintaan"
           onClose={() => setRejectTarget(null)}
           footer={
             <ModalActions
@@ -695,7 +695,7 @@ export function PeriodePage() {
             </p>
           </DrawerSection>
           {detailLock.unlockHistory.length > 0 ? (
-            <DrawerSection label="Riwayat unlock">
+            <DrawerSection label="Riwayat buka periode">
               <ul className="space-y-1 text-[11px] text-muted">
                 {detailLock.unlockHistory.map((h, idx) => (
                   <li key={idx}>

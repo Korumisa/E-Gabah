@@ -190,7 +190,7 @@ function postLegacyCompleteStock(
   addMovement: ReturnType<typeof usePersediaanStore>['addMovement'],
   reverse: boolean,
 ) {
-  const signNote = reverse ? 'Void' : 'Output'
+  const signNote = reverse ? 'Batal' : 'Hasil'
 
   if (reverse) {
     addMovement({
@@ -224,7 +224,7 @@ function postStartWipStock(
   addMovement: ReturnType<typeof usePersediaanStore>['addMovement'],
   reverse: boolean,
 ) {
-  const signNote = reverse ? 'Void start' : 'Start WIP'
+  const signNote = reverse ? 'Batal mulai' : 'Mulai proses'
   if (reverse) {
     addMovement({
       type: 'out',
@@ -310,7 +310,7 @@ function postCompleteWipStock(
   addMovement: ReturnType<typeof usePersediaanStore>['addMovement'],
   reverse: boolean,
 ) {
-  const signNote = reverse ? 'Void' : 'Output'
+  const signNote = reverse ? 'Batal' : 'Hasil'
   if (reverse) {
     postBatchOutputStock(batch, addMovement, true, WIP_LOCATION, signNote)
     addMovement({
@@ -349,7 +349,7 @@ function postPackStock(
   const sourceUnit = sourceLine?.unit ?? 'kg'
   const fromLoc = batch.toLocation
   const totalOut = sumPackRunOutQty(run)
-  const sign = reverse ? 'Void pack' : 'Pack'
+  const sign = reverse ? 'Batal kemas' : 'Kemas'
 
   if (reverse) {
     addMovement({

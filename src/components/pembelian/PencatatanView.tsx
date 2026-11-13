@@ -633,7 +633,7 @@ function PurchaseDetailDrawer({
         : p.stage === 'ditolak'
           ? p.rejectReason ?? 'Ditolak keuangan'
           : p.stage === 'diajukan'
-            ? 'Menunggu approve keuangan'
+            ? 'Menunggu persetujuan keuangan'
             : 'Setelah invoice diajukan',
       done:
         p.stage !== 'draft' &&

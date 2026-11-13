@@ -306,21 +306,21 @@ export function buildSaldoStats(rows: StockRow[]): MetricCardData[] {
 
   return [
     {
-      label: 'SKU aktif',
+      label: 'Jenis barang',
       value: String(totalSku),
-      delta: `+${rows.length} baris`,
+      delta: `${rows.length} baris`,
       positive: true,
     },
     {
       label: 'Stok (kg)',
       value: formatQty(totalKg, 'kg').replace(' kg', ''),
-      delta: '+2,4%',
+      delta: 'kg tercatat',
       positive: true,
     },
     {
       label: 'Stok rendah',
       value: String(low.length),
-      delta: low.length > 0 ? `+${low.length}` : '0',
+      delta: low.length > 0 ? 'perlu isi' : 'aman',
       positive: low.length === 0,
     },
     {
@@ -340,25 +340,25 @@ export function buildMutasiStats(rows: MovementRow[]): MetricCardData[] {
     {
       label: 'Total mutasi',
       value: String(rows.length),
-      delta: '+5',
+      delta: 'semua jenis',
       positive: true,
     },
     {
       label: 'Masuk',
       value: String(masuk.length),
-      delta: `+${masuk.length}`,
+      delta: 'dokumen',
       positive: true,
     },
     {
       label: 'Keluar',
       value: String(keluar.length),
-      delta: `+${keluar.length}`,
+      delta: 'dokumen',
       positive: keluar.length === 0,
     },
     {
-      label: 'Transfer',
+      label: 'Pindah',
       value: String(transfer.length),
-      delta: `+${transfer.length}`,
+      delta: 'antar gudang',
       positive: true,
     },
   ]
@@ -375,25 +375,25 @@ export function buildKoreksiStats(rows: CorrectionRow[]): MetricCardData[] {
     {
       label: 'Dokumen',
       value: String(rows.length),
-      delta: `+${rows.length}`,
+      delta: 'semua dokumen',
       positive: true,
     },
     {
-      label: 'Posted',
+      label: 'Dibukukan',
       value: String(posted.length),
-      delta: `+${posted.length}`,
+      delta: 'berlaku',
       positive: true,
     },
     {
-      label: 'Void',
+      label: 'Dibatalkan',
       value: String(voids.length),
-      delta: voids.length > 0 ? `+${voids.length}` : '0',
+      delta: voids.length > 0 ? 'ada batal' : 'tidak ada',
       positive: voids.length === 0,
     },
     {
-      label: 'Δ qty posted',
+      label: 'Selisih qty',
       value: formatQty(deltaAbs).replace(/ kg$/, ''),
-      delta: 'abs',
+      delta: 'kg',
       positive: true,
     },
   ]

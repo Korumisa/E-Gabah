@@ -78,9 +78,9 @@ type BiayaSortKey =
 
 const STATUS_FILTERS = [
   { value: 'all', label: 'Semua status' },
-  { value: 'draft', label: 'Draft' },
-  { value: 'posted', label: 'Posted' },
-  { value: 'void', label: 'Void' },
+  { value: 'draft', label: 'Draf' },
+  { value: 'posted', label: 'Dibukukan' },
+  { value: 'void', label: 'Dibatalkan' },
 ] as const
 
 type StatusFilter = (typeof STATUS_FILTERS)[number]['value']
@@ -501,8 +501,8 @@ export function BiayaPage() {
               label="Status awal"
               value={form.status}
               options={[
-                { value: 'draft', label: 'Draft', description: 'Belum dibukukan' },
-                { value: 'posted', label: 'Posted', description: 'Langsung dibukukan' },
+                { value: 'draft', label: 'Draf', description: 'Belum dibukukan' },
+                { value: 'posted', label: 'Dibukukan', description: 'Langsung dibukukan' },
               ]}
               onChange={(status) => setForm((f) => ({ ...f, status }))}
               requiredMark

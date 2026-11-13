@@ -260,7 +260,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
         action: 'submit',
         entity: 'expense',
         entityId: id,
-        note: 'Payroll diajukan (menunggu HR)',
+        note: 'Gaji diajukan, menunggu HR',
       })
       return undefined
     },
@@ -269,13 +269,13 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
 
   const approveAsHr = useCallback(
     (id: string): string | undefined => {
-      if (user?.role !== 'hr') return 'Hanya HR yang bisa approve tahap HR'
+      if (user?.role !== 'hr') return 'Hanya HR yang bisa menyetujui tahap ini'
       const current = runs.find((r) => r.id === id)
       if (!current || current.status !== 'menunggu_hr') {
-        return 'Payroll tidak menunggu approve HR'
+        return 'Gaji ini tidak menunggu persetujuan HR'
       }
       if (hasApproval(current.approvals, 'hr')) {
-        return 'Approve HR sudah tercatat'
+        return 'Persetujuan HR sudah tercatat'
       }
       const next = advanceAfterStamp(
         current,
@@ -286,7 +286,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
         action: 'approve',
         entity: 'expense',
         entityId: id,
-        note: 'Approve payroll (HR)',
+        note: 'Persetujuan gaji (HR)',
       })
       return undefined
     },
@@ -295,13 +295,13 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
 
   const approveAsAdmin = useCallback(
     (id: string): string | undefined => {
-      if (user?.role !== 'admin') return 'Hanya admin yang bisa approve sebagai admin'
+      if (user?.role !== 'admin') return 'Hanya admin yang bisa menyetujui tahap ini'
       const current = runs.find((r) => r.id === id)
       if (!current || current.status !== 'menunggu_admin') {
-        return 'Payroll tidak menunggu approve admin'
+        return 'Gaji ini tidak menunggu persetujuan admin'
       }
       if (hasApproval(current.approvals, 'admin')) {
-        return 'Approve admin sudah tercatat'
+        return 'Persetujuan admin sudah tercatat'
       }
       const next = advanceAfterStamp(
         current,
@@ -312,7 +312,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
         action: 'approve',
         entity: 'expense',
         entityId: id,
-        note: 'Approve payroll (admin)',
+        note: 'Persetujuan gaji (admin)',
       })
       return undefined
     },
@@ -322,14 +322,14 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
   const approveAsKeuangan = useCallback(
     (id: string): string | undefined => {
       if (user?.role !== 'keuangan') {
-        return 'Hanya keuangan yang bisa approve sebagai keuangan'
+        return 'Hanya keuangan yang bisa menyetujui tahap ini'
       }
       const current = runs.find((r) => r.id === id)
       if (!current || current.status !== 'menunggu_keuangan') {
-        return 'Payroll tidak menunggu approve keuangan'
+        return 'Gaji ini tidak menunggu persetujuan keuangan'
       }
       if (hasApproval(current.approvals, 'keuangan')) {
-        return 'Approve keuangan sudah tercatat'
+        return 'Persetujuan keuangan sudah tercatat'
       }
       const next = advanceAfterStamp(
         current,
@@ -340,7 +340,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
         action: 'approve',
         entity: 'expense',
         entityId: id,
-        note: 'Approve payroll (keuangan)',
+        note: 'Persetujuan gaji (keuangan)',
       })
       return undefined
     },
@@ -351,7 +351,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
     (id: string, reason: string): string | undefined => {
       const role = user?.role
       if (role !== 'admin' && role !== 'keuangan' && role !== 'hr') {
-        return 'Hanya HR, admin, atau keuangan yang dapat menolak payroll'
+        return 'Hanya HR, admin, atau keuangan yang dapat menolak gaji'
       }
       const trimmed = reason.trim()
       if (!trimmed) return 'Alasan penolakan wajib diisi.'
@@ -360,7 +360,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
         !current ||
         (!isPayrollPending(current.status) && current.status !== 'siap_cair')
       ) {
-        return 'Payroll tidak menunggu persetujuan'
+        return 'Gaji ini tidak menunggu persetujuan'
       }
       setRuns((list) =>
         list.map((r) =>
@@ -378,7 +378,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
         action: 'reject',
         entity: 'expense',
         entityId: id,
-        note: `Tolak payroll: ${trimmed}`,
+        note: `Tolak gaji: ${trimmed}`,
       })
       return undefined
     },
@@ -391,12 +391,12 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
       if (role !== 'keuangan' && role !== 'admin') {
         return {
           ok: false,
-          error: 'Hanya keuangan atau admin yang bisa mencairkan payroll',
+          error: 'Hanya keuangan atau admin yang bisa mencairkan gaji',
         }
       }
       const current = runs.find((r) => r.id === id)
       if (!current || current.status !== 'siap_cair') {
-        return { ok: false, error: 'Payroll harus siap cair sebelum dicairkan' }
+        return { ok: false, error: 'Gaji harus siap cair sebelum dicairkan' }
       }
       if (!hasProof(proof)) {
         return { ok: false, error: 'Lampirkan bukti transfer sebelum cair' }
@@ -406,7 +406,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
       const total = runTotal(current)
       const cashErr = addCashEntry({
         direction: 'out',
-        category: 'Payroll',
+        category: 'Gaji',
         description: `Gaji ${current.period} · ${current.id}${
           current.mutationNote ? ` · ${current.mutationNote}` : ''
         }`,
@@ -427,7 +427,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
       )
       const journalError = postPayrollJournal(postJournalEntry, mapAccount, {
         date: todayIsoDate(),
-        memo: `Payroll ${current.period} · ${current.id}`,
+        memo: `Gaji ${current.period} · ${current.id}`,
         sourceKey: `payrun:${id}:post`,
         amount: total,
         debitKey: 'payroll',
@@ -437,7 +437,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
         action: 'post',
         entity: 'expense',
         entityId: id,
-        note: `Cair payroll ${total}`,
+        note: `Cair gaji ${total}`,
       })
       return journalError ? { ok: true, journalError } : { ok: true }
     },
@@ -448,7 +448,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
     (id: string): string | undefined => {
       const role = user?.role
       if (role !== 'keuangan' && role !== 'admin') {
-        return 'Hanya keuangan atau admin yang bisa void payroll'
+        return 'Hanya keuangan atau admin yang bisa membatalkan gaji'
       }
       const current = runs.find((r) => r.id === id)
       if (!current || current.status === 'void') return undefined
@@ -457,8 +457,8 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
       if (current.status === 'posted') {
         const cashErr = addCashEntry({
           direction: 'in',
-          category: 'Payroll',
-          description: `Void gaji ${current.period} · ${current.id}`,
+          category: 'Gaji',
+          description: `Batal gaji ${current.period} · ${current.id}`,
           amount: runTotal(current),
         })
         if (cashErr) return cashErr
@@ -476,7 +476,7 @@ export function PayrollProvider({ children }: { children: ReactNode }) {
         action: 'void',
         entity: 'expense',
         entityId: id,
-        note: 'Void payroll',
+        note: 'Batal gaji',
       })
       return undefined
     },

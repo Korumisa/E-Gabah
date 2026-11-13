@@ -83,11 +83,18 @@ Deno.serve(async (req) => {
     })
 
     if (!res.ok) {
+      // Soft-fail: login must not break if Resend key/domain is misconfigured.
       const detail = await res.text()
+      console.error("login-alert resend failed", res.status, detail)
       return new Response(
-        JSON.stringify({ ok: false, emailed: false, detail }),
+        JSON.stringify({
+          ok: true,
+          emailed: false,
+          reason: "resend_failed",
+          detail,
+        }),
         {
-          status: 502,
+          status: 200,
           headers: { ...cors, "Content-Type": "application/json" },
         },
       )

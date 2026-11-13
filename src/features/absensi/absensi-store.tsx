@@ -117,10 +117,10 @@ export function AbsensiProvider({ children }: { children: ReactNode }) {
   const checkIn = useCallback(async (): Promise<string | undefined> => {
     if (!user) return 'Anda belum masuk.'
     if (!ready) return 'Absensi masih memuat…'
-    if (todayMine?.checkIn) return 'Sudah check-in hari ini.'
+    if (todayMine?.checkIn) return 'Sudah absen masuk hari ini.'
     const geo = await readBrowserGeo()
     if (!hasGeo(geo)) {
-      return 'Izinkan lokasi perangkat untuk check-in (geolocation wajib).'
+      return 'Izinkan lokasi perangkat untuk absen masuk.'
     }
     const now = new Date()
     const late =
@@ -140,7 +140,7 @@ export function AbsensiProvider({ children }: { children: ReactNode }) {
       entity: 'attendance',
       entityId: row.id,
       after: row,
-      note: late ? 'Check-in terlambat + geo' : 'Check-in + geo',
+      note: late ? 'Masuk terlambat, lokasi tersimpan' : 'Masuk, lokasi tersimpan',
     })
     return undefined
   }, [user, todayMine, today, ready, appendAudit])
@@ -148,11 +148,11 @@ export function AbsensiProvider({ children }: { children: ReactNode }) {
   const checkOut = useCallback(async (): Promise<string | undefined> => {
     if (!user) return 'Anda belum masuk.'
     if (!ready) return 'Absensi masih memuat…'
-    if (!todayMine?.checkIn) return 'Check-in dulu sebelum check-out.'
-    if (todayMine.checkOut) return 'Sudah check-out hari ini.'
+    if (!todayMine?.checkIn) return 'Absen masuk dulu sebelum absen keluar.'
+    if (todayMine.checkOut) return 'Sudah absen keluar hari ini.'
     const geo = await readBrowserGeo()
     if (!hasGeo(geo)) {
-      return 'Izinkan lokasi perangkat untuk check-out (geolocation wajib).'
+      return 'Izinkan lokasi perangkat untuk absen keluar.'
     }
     const now = new Date().toISOString()
     const before = todayMine
@@ -166,7 +166,7 @@ export function AbsensiProvider({ children }: { children: ReactNode }) {
       entityId: todayMine.id,
       before,
       after,
-      note: 'Check-out + geo',
+      note: 'Keluar, lokasi tersimpan',
     })
     return undefined
   }, [user, todayMine, ready, appendAudit])

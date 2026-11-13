@@ -55,13 +55,13 @@ import { hasApproval } from '@/features/workflow/approvals'
 
 const STATUS_FILTERS = [
   { value: 'all', label: 'Semua status' },
-  { value: 'draft', label: 'Draft' },
+  { value: 'draft', label: 'Draf' },
   { value: 'menunggu_hr', label: 'Menunggu HR' },
   { value: 'menunggu_admin', label: 'Menunggu admin' },
   { value: 'menunggu_keuangan', label: 'Menunggu keuangan' },
   { value: 'siap_cair', label: 'Siap cair' },
-  { value: 'posted', label: 'Posted' },
-  { value: 'void', label: 'Void' },
+  { value: 'posted', label: 'Dibukukan' },
+  { value: 'void', label: 'Dibatalkan' },
 ] as const
 
 type StatusFilter = (typeof STATUS_FILTERS)[number]['value']
@@ -159,17 +159,17 @@ export function PayrollPage() {
       {
         label: 'Run gaji',
         value: String(runs.length),
-        delta: `${draft.length} draft · ${pending.length} approve`,
+        delta: `${draft.length} draf · ${pending.length} menunggu`,
         positive: true,
       },
       {
-        label: 'Posted',
+        label: 'Dibukukan',
         value: String(posted.length),
         delta: 'ke kas keluar',
         positive: true,
       },
       {
-        label: 'Total posted',
+        label: 'Total dibukukan',
         value: formatIdr(totalPosted),
         delta: 'periode aktif',
         positive: true,
@@ -229,8 +229,8 @@ export function PayrollPage() {
       setToast('Tidak ada pengguna aktif')
       return
     }
-    const id = createRun(period, lines, `Payroll ${period}`)
-    setToast(`Draft ${id} dibuat — sesuaikan gaji lalu ajukan approve`)
+    const id = createRun(period, lines, `Gaji ${period}`)
+    setToast(`Draf ${id} dibuat. Sesuaikan nominal lalu ajukan.`)
     openDetail(id)
   }
 
@@ -242,13 +242,13 @@ export function PayrollPage() {
       <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
           <div>
-            <h2 className="text-[14px] font-semibold text-ink">Payroll</h2>
+            <h2 className="text-[14px] font-semibold text-ink">Gaji</h2>
             <p className="mt-0.5 text-[12.5px] text-muted">
-              Dual approve admin + keuangan, bukti transfer wajib saat cair
+              Persetujuan admin lalu keuangan. Bukti transfer wajib saat cair.
             </p>
           </div>
           <label className="text-[12px] text-muted">
-            Periode draft baru
+            Periode draf baru
             <input
               type="month"
               value={period}
@@ -394,28 +394,28 @@ export function PayrollPage() {
           onSubmit={() => {
             const err = submitForApproval(detail.id)
             if (err) setToast(err)
-            else setToast('Payroll diajukan — menunggu approve HR')
+            else setToast('Gaji diajukan. Menunggu persetujuan HR.')
           }}
           onApproveHr={() => {
             const err = approveAsHr(detail.id)
             if (err) setToast(err)
-            else setToast('Approve HR tercatat')
+            else setToast('Persetujuan HR tercatat')
           }}
           onApproveAdmin={() => {
             const err = approveAsAdmin(detail.id)
             if (err) setToast(err)
-            else setToast('Approve admin tercatat')
+            else setToast('Persetujuan admin tercatat')
           }}
           onApproveKeuangan={() => {
             const err = approveAsKeuangan(detail.id)
             if (err) setToast(err)
-            else setToast('Approve keuangan tercatat — siap cair')
+            else setToast('Persetujuan keuangan tercatat. Siap cair.')
           }}
           onReject={(reason) => {
             const err = rejectRun(detail.id, reason)
             if (err) setToast(err)
             else {
-              setToast('Payroll ditolak — kembali ke draft')
+              setToast('Gaji ditolak. Kembali ke draf.')
               closeDetail()
             }
           }}
@@ -427,10 +427,10 @@ export function PayrollPage() {
             }
             if (result.journalError) {
               setToast(
-                `Payroll dicairkan ke kas · jurnal gagal: ${result.journalError}`,
+                `Gaji dicairkan ke kas. Jurnal gagal: ${result.journalError}`,
               )
             } else {
-              setToast('Payroll dicairkan ke kas')
+              setToast('Gaji dicairkan ke kas')
             }
             closeDetail()
           }}
@@ -818,11 +818,11 @@ function PayrollDetailDrawer({
           </DrawerSection>
         ) : null}
 
-        <DrawerSection label="Meta run">
+        <DrawerSection label="Catatan">
           {run.status === 'draft' ? (
             <TextField
               id="pay-run-note"
-              label="Catatan run"
+              label="Catatan"
               value={run.note}
               placeholder="Mis. Gaji Oktober"
               onChange={(e) => onUpdateNote(e.target.value)}
@@ -833,7 +833,7 @@ function PayrollDetailDrawer({
                 ['Catatan', run.note || ','],
                 ['Dibuat', new Date(run.createdAt).toLocaleString('id-ID')],
                 [
-                  'Posted',
+                  'Dibukukan',
                   run.postedAt
                     ? new Date(run.postedAt).toLocaleString('id-ID')
                     : ',',

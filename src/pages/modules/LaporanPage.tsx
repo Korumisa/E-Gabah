@@ -298,7 +298,7 @@ export function LaporanPage() {
             {(
               [
                 ['ringkas', 'Ringkas'],
-                ['aging', 'Aging AR/AP'],
+                ['aging', 'Umur utang & piutang'],
                 ['stok', 'Stok rendah'],
                 ['produksi', 'Rendemen'],
                 ['neraca-saldo', 'Neraca saldo'],
@@ -392,7 +392,7 @@ export function LaporanPage() {
                     facts={[
                       { label: 'Jenis', value: row.kind },
                       { label: 'Sisa', value: idr(row.sisa) },
-                      { label: 'Aging', value: `${row.aging}h` },
+                      { label: 'Umur', value: `${row.aging} hari` },
                     ]}
                   />
                 ))
@@ -404,7 +404,7 @@ export function LaporanPage() {
               <FinanceTh>Mitra</FinanceTh>
               <FinanceTh>Invoice</FinanceTh>
               <FinanceTh>Sisa</FinanceTh>
-              <FinanceTh>Aging</FinanceTh>
+              <FinanceTh>Umur</FinanceTh>
               <FinanceTh>Status</FinanceTh>
             </FinanceThead>
             <tbody>
@@ -414,7 +414,7 @@ export function LaporanPage() {
                   <FinanceTd>{row.party}</FinanceTd>
                   <FinanceTd mono>{row.invoice}</FinanceTd>
                   <FinanceTd mono>{idr(row.sisa)}</FinanceTd>
-                  <FinanceTd mono>{row.aging}h</FinanceTd>
+                  <FinanceTd mono>{row.aging} hari</FinanceTd>
                   <FinanceTd>
                     <StatusPill
                       label={row.status}

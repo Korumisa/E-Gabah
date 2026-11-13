@@ -421,7 +421,7 @@ export function PembelianProvider({ children }: { children: ReactNode }) {
         return 'Pembelian pada tahap ini tidak dapat dibatalkan.'
       }
       if (returns.some((r) => r.purchaseId === id && r.stage === 'posted')) {
-        return 'Void ditolak: masih ada retur posted. Void/batalkan retur dulu.'
+        return 'Tidak bisa dibatalkan: masih ada retur yang sudah dibukukan. Batalkan retur dulu.'
       }
       const locked = assertPeriodOpen(todayIsoDate())
       if (locked) return locked
@@ -514,7 +514,7 @@ export function PembelianProvider({ children }: { children: ReactNode }) {
       const current = items.find((p) => p.id === id)
       if (!current) return 'Dokumen pembelian tidak ditemukan.'
       if (current.stage !== 'diajukan') {
-        return 'Hanya pengajuan menunggu approve yang dapat disetujui.'
+        return 'Hanya pengajuan yang menunggu persetujuan yang dapat disetujui.'
       }
       const role = user!.role
       if (role !== 'keuangan' && role !== 'admin') {
@@ -553,7 +553,7 @@ export function PembelianProvider({ children }: { children: ReactNode }) {
       const current = items.find((p) => p.id === id)
       if (!current) return 'Dokumen pembelian tidak ditemukan.'
       if (current.stage !== 'diajukan') {
-        return 'Hanya pengajuan menunggu approve yang dapat ditolak.'
+        return 'Hanya pengajuan yang menunggu persetujuan yang dapat ditolak.'
       }
       patch(id, () => ({
         stage: 'ditolak',
@@ -1235,7 +1235,7 @@ export function PembelianProvider({ children }: { children: ReactNode }) {
         action: 'update',
         entity: 'purchase',
         entityId: current.purchaseId,
-        note: `Override QC ${lotId}: ${trimmed}`,
+        note: `Ubah QC ${lotId}: ${trimmed}`,
       })
       return undefined
     },

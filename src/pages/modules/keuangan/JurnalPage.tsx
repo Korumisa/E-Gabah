@@ -183,7 +183,7 @@ function journalStatus(j: JournalEntry): {
   label: string
   tone: 'good' | 'muted' | 'danger' | 'warn' | 'neutral'
 } {
-  if (j.voidedAt) return { label: 'Void', tone: 'danger' }
+  if (j.voidedAt) return { label: 'Dibatalkan', tone: 'danger' }
   if (j.reversedById) return { label: 'Dibalik', tone: 'muted' }
   if (j.reversesId) return { label: 'Pembalikan', tone: 'neutral' }
   return { label: 'Aktif', tone: 'good' }

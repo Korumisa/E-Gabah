@@ -16,7 +16,7 @@ export function LoginPreview() {
           E-Gabah
         </p>
         <p className="mt-3 max-w-[18rem] text-[15px] leading-relaxed text-white/85">
-          Operasi mill: beli gabah, giling, stok, jual, dan kas.
+          Beli gabah, giling, stok, jual, dan kas.
         </p>
         <p className="mt-6 text-[11px] text-white/55">
           Sawah Tegallalang · Christophe95 · CC BY-SA 4.0

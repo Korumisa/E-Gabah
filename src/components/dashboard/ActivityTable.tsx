@@ -7,14 +7,14 @@ import { usePageSize } from '@/features/settings/usePageSize'
 const STATUS_LABEL = {
   ok: 'Selesai',
   warn: 'Proses',
-  draft: 'Draft',
+  draft: 'Draf',
 } as const
 
 const STATUS_FILTERS = [
   { value: 'all', label: 'Semua status' },
   { value: 'ok', label: 'Selesai' },
   { value: 'warn', label: 'Proses' },
-  { value: 'draft', label: 'Draft' },
+  { value: 'draft', label: 'Draf' },
 ] as const
 
 type StatusFilter = (typeof STATUS_FILTERS)[number]['value']

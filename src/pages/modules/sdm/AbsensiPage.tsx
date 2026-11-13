@@ -179,14 +179,14 @@ export function AbsensiPage() {
     setBusy(true)
     const err = await checkIn()
     setBusy(false)
-    setToast(err ?? 'Check-in tercatat dengan lokasi')
+    setToast(err ?? 'Masuk tercatat dengan lokasi')
   }
 
   async function handleOut() {
     setBusy(true)
     const err = await checkOut()
     setBusy(false)
-    setToast(err ?? 'Check-out tercatat dengan lokasi')
+    setToast(err ?? 'Keluar tercatat dengan lokasi')
   }
 
   return (
@@ -203,7 +203,7 @@ export function AbsensiPage() {
         <div className="flex flex-col gap-2.5">
         <AbsensiHereMap />
         <PageSection
-          title="Check-in / out"
+          title="Masuk / keluar"
           subtitle={clock}
           actions={<FinanceToast message={toast} />}
         >
@@ -259,7 +259,7 @@ export function AbsensiPage() {
               disabled={busy || Boolean(todayMine?.checkIn)}
               className="h-11 rounded-xl bg-brand-800 px-4 text-[14px] font-semibold text-white transition hover:bg-brand-900 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Check-in
+              Masuk
             </button>
             <button
               type="button"
@@ -269,7 +269,7 @@ export function AbsensiPage() {
               }
               className="h-11 rounded-xl border border-line px-4 text-[14px] font-medium text-ink transition hover:bg-brand-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Check-out
+              Keluar
             </button>
             <Link
               to="/absensi/cuti"
@@ -287,7 +287,7 @@ export function AbsensiPage() {
             ) : null}
           </div>
           <p className="mt-3 text-[12px] text-muted">
-            Lokasi perangkat wajib saat check-in/out. Data lokasi hanya terlihat
+            Lokasi perangkat wajib saat masuk dan keluar. Data lokasi hanya terlihat
             oleh Anda, HR, dan admin.
           </p>
         </PageSection>
@@ -314,7 +314,7 @@ export function AbsensiPage() {
           title="Titik absensi Anda"
           subtitle="30 hari terakhir · masuk (hijau) dan keluar (biru)"
           pins={myPins}
-          emptyHint="Belum ada titik. Lakukan check-in dengan izin lokasi."
+          emptyHint="Belum ada titik. Catat masuk dengan izin lokasi."
           mapClassName="h-[220px] w-full sm:h-[280px]"
         />
       </Suspense>
@@ -354,7 +354,7 @@ export function AbsensiPage() {
           minWidth="720px"
           mobileCards={
             todayRows.length === 0 ? (
-              <FinanceListEmpty message="Belum ada check-in. Tekan Check-in untuk memulai." />
+              <FinanceListEmpty message="Belum ada absen masuk. Tekan Masuk untuk memulai." />
             ) : (
               todayRows.map((row) => (
                 <FinanceListCard
@@ -417,7 +417,7 @@ export function AbsensiPage() {
             {todayRows.length === 0 ? (
               <FinanceEmptyRow
                 colSpan={6}
-                message="Belum ada check-in. Tekan Check-in untuk memulai."
+                message="Belum ada absen masuk. Tekan Masuk untuk memulai."
               />
             ) : (
               todayRows.map((row, index) => (

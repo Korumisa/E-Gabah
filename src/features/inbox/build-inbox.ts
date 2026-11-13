@@ -87,8 +87,8 @@ export function buildInbox(src: InboxSources): InboxItem[] {
       id: `po:${p.id}`,
       kind: 'purchase_budget',
       title: p.id,
-      subtitle: 'Approve anggaran pembelian',
-      statusLabel: 'Menunggu approve',
+      subtitle: 'Persetujuan anggaran pembelian',
+      statusLabel: 'Menunggu persetujuan',
       href: dokHref('/app/pembelian', p.id),
       createdAt: p.date,
       actorRoles: actors,
@@ -111,7 +111,7 @@ export function buildInbox(src: InboxSources): InboxItem[] {
       kind: 'batch',
       title: b.id,
       subtitle: `Batch giling · ${b.inputName}`,
-      statusLabel: 'Menunggu approve',
+      statusLabel: 'Menunggu persetujuan',
       href: dokHref('/app/produksi', b.id),
       createdAt: b.submittedAt ?? b.date,
       actorRoles: actors,
@@ -126,7 +126,7 @@ export function buildInbox(src: InboxSources): InboxItem[] {
 
   for (const run of src.payrollRuns) {
     let actors: UserRole[] = []
-    let statusLabel = 'Menunggu approve'
+    let statusLabel = 'Menunggu persetujuan'
     let href = dokHref('/app/keuangan/payroll', run.id)
     if (run.status === 'menunggu_hr') {
       actors = ['hr']
@@ -197,11 +197,11 @@ export function buildInbox(src: InboxSources): InboxItem[] {
       kind: 'period_unlock',
       title: lock
         ? lock.kind === 'month' && lock.yearMonth
-          ? `Unlock ${lock.yearMonth}`
-          : `Unlock ${lock.startDate}–${lock.endDate}`
-        : `Unlock ${req.id}`,
+          ? `Buka ${lock.yearMonth}`
+          : `Buka ${lock.startDate}–${lock.endDate}`
+        : `Buka ${req.id}`,
       subtitle: req.reason,
-      statusLabel: 'Menunggu unlock',
+      statusLabel: 'Menunggu buka periode',
       href: dokHref('/app/keuangan/periode', req.id),
       createdAt: req.createdAt,
       actorRoles: actors,

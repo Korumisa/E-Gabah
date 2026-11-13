@@ -46,7 +46,7 @@ export function AppSidebar({ mobileOpen = false, onNavigate }: AppSidebarProps) 
         </span>
         <div className="min-w-0 leading-tight">
           <p className="truncate text-[15px] font-semibold text-ink">E-Gabah</p>
-          <p className="truncate text-[12px] text-muted">ERP Penggilingan</p>
+          <p className="truncate text-[12px] text-muted">Penggilingan padi</p>
         </div>
       </div>
 

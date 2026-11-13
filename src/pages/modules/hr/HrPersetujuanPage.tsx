@@ -137,7 +137,7 @@ export function HrPersetujuanPage() {
     <div className="space-y-2.5">
       <PageSection
         title="Persetujuan cuti / izin"
-        subtitle="Cek bukti + isi alasan sebelum setujui/tolak. Admin dapat override keputusan HR"
+        subtitle="Cek bukti dan isi alasan sebelum setuju atau tolak. Admin dapat mengubah keputusan HR."
         actions={<FinanceToast message={toast} />}
       >
         <FinanceTable
@@ -319,7 +319,7 @@ export function HrPersetujuanPage() {
       <PageSection
         title={
           user.role === 'admin'
-            ? 'Riwayat diputuskan · override admin'
+            ? 'Riwayat keputusan, termasuk ubahan admin'
             : 'Riwayat diputuskan'
         }
       >
@@ -343,11 +343,11 @@ export function HrPersetujuanPage() {
                   facts={[
                     { label: 'Bukti', value: <ProofLink row={row} /> },
                     { label: 'Catatan', value: row.reviewNote ?? '—' },
-                    { label: 'Reviewer', value: row.reviewedBy ?? '—' },
+                    { label: 'Pemeriksa', value: row.reviewedBy ?? '—' },
                     ...(row.overrideNote
                       ? [
                           {
-                            label: 'Override',
+                            label: 'Ubah keputusan',
                             value: `${row.overriddenBy}: ${row.overrideNote}`,
                           },
                         ]
@@ -358,7 +358,7 @@ export function HrPersetujuanPage() {
                       <div className="w-full min-w-[140px] space-y-2">
                         <TextField
                           id={`ov-m-${row.id}`}
-                          label="Override"
+                          label="Ubah keputusan"
                           value={noteOf(`ov-${row.id}`)}
                           onChange={(e) =>
                             setNotes((m) => ({
@@ -366,7 +366,7 @@ export function HrPersetujuanPage() {
                               [`ov-${row.id}`]: e.target.value,
                             }))
                           }
-                          placeholder="Alasan override…"
+                          placeholder="Alasan ubah keputusan…"
                         />
                         {row.status === 'rejected' ? (
                           <button
@@ -378,11 +378,11 @@ export function HrPersetujuanPage() {
                                 'approved',
                                 noteOf(`ov-${row.id}`),
                               ).then((err) =>
-                                setToast(err ?? 'Override: disetujui'),
+                                setToast(err ?? 'Keputusan diubah: disetujui'),
                               )
                             }}
                           >
-                            Override setujui
+                            Ubah jadi setuju
                           </button>
                         ) : (
                           <button
@@ -394,11 +394,11 @@ export function HrPersetujuanPage() {
                                 'rejected',
                                 noteOf(`ov-${row.id}`),
                               ).then((err) =>
-                                setToast(err ?? 'Override: ditolak'),
+                                setToast(err ?? 'Keputusan diubah: ditolak'),
                               )
                             }}
                           >
-                            Override tolak
+                            Ubah jadi tolak
                           </button>
                         )}
                       </div>
@@ -437,7 +437,7 @@ export function HrPersetujuanPage() {
             />
             <FinanceTh>Bukti</FinanceTh>
             <FinanceTh>Catatan</FinanceTh>
-            <FinanceTh>Override</FinanceTh>
+            <FinanceTh>Ubah keputusan</FinanceTh>
           </FinanceThead>
           <tbody>
             {decided.length === 0 ? (
@@ -474,7 +474,7 @@ export function HrPersetujuanPage() {
                       <div className="space-y-2">
                         <TextField
                           id={`ov-${row.id}`}
-                          label="Override"
+                          label="Ubah keputusan"
                           value={noteOf(`ov-${row.id}`)}
                           onChange={(e) =>
                             setNotes((m) => ({
@@ -482,7 +482,7 @@ export function HrPersetujuanPage() {
                               [`ov-${row.id}`]: e.target.value,
                             }))
                           }
-                          placeholder="Alasan override…"
+                          placeholder="Alasan ubah keputusan…"
                           className="min-w-[160px]"
                         />
                         <div className="inline-flex flex-wrap gap-2">
@@ -496,11 +496,11 @@ export function HrPersetujuanPage() {
                                   'approved',
                                   noteOf(`ov-${row.id}`),
                                 ).then((err) =>
-                                  setToast(err ?? 'Override: disetujui'),
+                                  setToast(err ?? 'Keputusan diubah: disetujui'),
                                 )
                               }}
                             >
-                              Override setujui
+                              Ubah jadi setuju
                             </button>
                           ) : (
                             <button
@@ -512,23 +512,23 @@ export function HrPersetujuanPage() {
                                   'rejected',
                                   noteOf(`ov-${row.id}`),
                                 ).then((err) =>
-                                  setToast(err ?? 'Override: ditolak'),
+                                  setToast(err ?? 'Keputusan diubah: ditolak'),
                                 )
                               }}
                             >
-                              Override tolak
+                              Ubah jadi tolak
                             </button>
                           )}
                         </div>
                         {row.overrideNote ? (
                           <p className="text-[11px] text-amber-800">
-                            Override {row.overriddenBy}: {row.overrideNote}
+                            Diubah {row.overriddenBy}: {row.overrideNote}
                           </p>
                         ) : null}
                       </div>
                     ) : row.overrideNote ? (
                       <p className="text-[11px] text-amber-800">
-                        Override {row.overriddenBy}: {row.overrideNote}
+                        Diubah {row.overriddenBy}: {row.overrideNote}
                       </p>
                     ) : (
                       <span className="text-[12px] text-muted">—</span>

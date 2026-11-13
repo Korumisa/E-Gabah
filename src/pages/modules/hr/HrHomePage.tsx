@@ -58,7 +58,7 @@ export function HrHomePage() {
       {
         label: 'Cuti menunggu',
         value: String(pendingLeave.length),
-        delta: pendingLeave.length ? 'Perlu review' : 'Kosong',
+        delta: pendingLeave.length ? 'Perlu dicek' : 'Kosong',
         positive: pendingLeave.length === 0,
       },
       {
@@ -70,9 +70,9 @@ export function HrHomePage() {
         positive: lateToday.length === 0,
       },
       {
-        label: user?.role === 'hr' ? 'Payroll (HR)' : 'Payroll (admin)',
+        label: user?.role === 'hr' ? 'Gaji (HR)' : 'Gaji (admin)',
         value: String(payrollQueue.length),
-        delta: payrollQueue.length ? 'Perlu stamp' : 'Kosong',
+        delta: payrollQueue.length ? 'Perlu persetujuan' : 'Kosong',
         positive: payrollQueue.length === 0,
       },
       {

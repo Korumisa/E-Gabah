@@ -80,5 +80,5 @@ export function assertPeriodOpenAgainst(
     hit.kind === 'month' && hit.yearMonth
       ? hit.yearMonth
       : `${hit.startDate}–${hit.endDate}`
-  return `Periode terkunci (${label}). Buat permintaan unlock dan tunggu persetujuan.`
+  return `Periode terkunci (${label}). Ajukan buka periode dan tunggu persetujuan.`
 }

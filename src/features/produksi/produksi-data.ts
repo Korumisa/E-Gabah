@@ -73,8 +73,8 @@ export type NewBatchInput = {
 }
 
 export const BATCH_STAGE_LABEL: Record<BatchStage, string> = {
-  draft: 'Draft',
-  submitted: 'Menunggu approve',
+  draft: 'Draf',
+  submitted: 'Menunggu persetujuan',
   approved: 'Disetujui',
   processing: 'Proses giling',
   done: 'Selesai',
@@ -275,19 +275,19 @@ export function buildBatchStats(batches: ProductionBatch[]): MetricCardData[] {
       positive: true,
     },
     {
-      label: 'Menunggu approve',
+      label: 'Menunggu persetujuan',
       value: String(waiting.length),
-      delta: waiting.length ? 'Perlu review' : 'Kosong',
+      delta: waiting.length ? 'Perlu dicek' : 'Kosong',
       positive: waiting.length === 0,
     },
     {
       label: 'Selesai',
       value: String(done.length),
-      delta: 'Posted stok',
+      delta: 'stok tercatat',
       positive: true,
     },
     {
-      label: 'Avg rendemen',
+      label: 'Rata-rata rendemen',
       value: `${avgRend.toFixed(1)}%`,
       delta: 'dari batch selesai',
       positive: avgRend >= 60,

@@ -62,7 +62,7 @@ export function AbsensiHereMap() {
         lat: state.geo.lat,
         lng: state.geo.lng,
         label: 'Lokasi Anda sekarang',
-        sublabel: `Titik ini yang tercatat saat check-in atau check-out${acc}`,
+        sublabel: `Titik ini yang tercatat saat masuk atau keluar${acc}`,
         kind: 'in',
       },
     ]
@@ -76,7 +76,7 @@ export function AbsensiHereMap() {
             : ''
         }`
       : state.status === 'denied'
-        ? 'Izin lokasi ditolak. Check-in tidak bisa disimpan tanpa titik ini.'
+        ? 'Izin lokasi ditolak. Absen masuk tidak bisa disimpan tanpa titik ini.'
         : 'Mencari lokasi perangkat…'
 
   const emptyHint =

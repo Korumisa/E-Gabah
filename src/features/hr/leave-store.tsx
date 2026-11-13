@@ -309,7 +309,7 @@ export function LeaveProvider({ children }: { children: ReactNode }) {
       const current = requests.find((r) => r.id === id)
       if (!current) return 'Pengajuan tidak ditemukan.'
       if (current.status !== 'approved' && current.status !== 'rejected') {
-        return 'Override hanya untuk pengajuan yang sudah diputuskan HR.'
+        return 'Ubah keputusan hanya untuk pengajuan yang sudah diputuskan HR.'
       }
       if (current.status === status) {
         return `Status sudah ${status === 'approved' ? 'disetujui' : 'ditolak'}.`
@@ -335,7 +335,7 @@ export function LeaveProvider({ children }: { children: ReactNode }) {
         entityId: id,
         before: current,
         after: next,
-        note: `Override admin: ${note.trim()}`,
+        note: `Ubah keputusan admin: ${note.trim()}`,
       })
       const persistErr = await persistRow(next)
       return stampErr ?? persistErr

@@ -616,7 +616,7 @@ function ReceiveDetailDrawer({
       })}`}
       badge={
         <StatusPill
-          label={p.voidedAt ? 'Void' : STAGE_LABEL[p.stage]}
+          label={p.voidedAt ? 'Dibatalkan' : STAGE_LABEL[p.stage]}
           tone={
             p.voidedAt
               ? 'muted'
@@ -958,7 +958,7 @@ function WeighingModal({
             }}
             className="w-full rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[13px] font-medium text-amber-900 transition hover:bg-amber-100"
           >
-            Override QC (admin)
+            Ubah hasil QC
           </button>
         ) : null}
 
@@ -1080,7 +1080,7 @@ function WeighingModal({
 
     <PromptDialog
       open={overrideOpen}
-      title="Override QC lot"
+      title="Ubah hasil QC"
       description={
         p.lotId
           ? `Lot ${p.lotId} tidak lulus QC. Admin dapat menerima dengan alasan tercatat di audit.`
@@ -1088,7 +1088,7 @@ function WeighingModal({
       }
       label="Alasan override"
       placeholder="Misalnya mutu diterima setelah sortir ulang…"
-      confirmLabel="Override & lanjut"
+      confirmLabel="Ubah dan lanjutkan"
       danger
       submitError={overrideError}
       onClose={() => {

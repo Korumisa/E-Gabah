@@ -52,8 +52,8 @@ import { usePageSize } from '@/features/settings/usePageSize'
 
 const STATUS_FILTERS = [
   { value: 'all', label: 'Semua status' },
-  { value: 'posted', label: 'Posted' },
-  { value: 'void', label: 'Void' },
+  { value: 'posted', label: 'Dibukukan' },
+  { value: 'void', label: 'Dibatalkan' },
 ] as const
 
 type StatusFilter = (typeof STATUS_FILTERS)[number]['value']
@@ -191,7 +191,7 @@ export function KoreksiPage() {
         value: formatQty(row.afterQty - row.beforeQty, row.unit),
       },
       { label: 'Alasan', value: row.reason },
-      { label: 'Status', value: row.status === 'posted' ? 'Posted' : 'Void' },
+      { label: 'Status', value: row.status === 'posted' ? 'Dibukukan' : 'Dibatalkan' },
       { label: 'Oleh', value: row.actor },
       { label: 'Bukti', value: row.receiptName ?? ',' },
     ])
@@ -253,7 +253,7 @@ export function KoreksiPage() {
                   subtitle={row.productName}
                   badges={
                     <StatusPill
-                      label={row.status === 'posted' ? 'Posted' : 'Void'}
+                      label={row.status === 'posted' ? 'Dibukukan' : 'Dibatalkan'}
                       tone={row.status === 'posted' ? 'good' : 'muted'}
                     />
                   }
@@ -310,7 +310,7 @@ export function KoreksiPage() {
                   </FinanceTd>
                   <FinanceTd>
                     <StatusPill
-                      label={row.status === 'posted' ? 'Posted' : 'Void'}
+                      label={row.status === 'posted' ? 'Dibukukan' : 'Dibatalkan'}
                       tone={row.status === 'posted' ? 'good' : 'muted'}
                     />
                   </FinanceTd>
@@ -450,7 +450,7 @@ function KoreksiDetailDrawer({
       subtitle={row.date}
       badge={
         <StatusPill
-          label={posted ? 'Posted' : 'Void'}
+          label={posted ? 'Dibukukan' : 'Dibatalkan'}
           tone={posted ? 'good' : 'muted'}
         />
       }
@@ -504,7 +504,7 @@ function KoreksiDetailDrawer({
             ['Sebelum', formatQty(row.beforeQty, row.unit)],
             ['Sesudah', formatQty(row.afterQty, row.unit)],
             ['Selisih', formatQty(delta, row.unit)],
-            ['Status', posted ? 'Posted' : 'Void'],
+            ['Status', posted ? 'Dibukukan' : 'Dibatalkan'],
           ]}
         />
       </DrawerSection>

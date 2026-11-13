@@ -440,9 +440,9 @@ export const RECEIVABLE_STATUS_LABEL: Record<ReceivableStatus, string> = {
 }
 
 export const EXPENSE_STATUS_LABEL: Record<ExpenseStatus, string> = {
-  draft: 'Draft',
-  posted: 'Posted',
-  void: 'Void',
+  draft: 'Draf',
+  posted: 'Dibukukan',
+  void: 'Dibatalkan',
 }
 
 export const CASH_CATEGORIES = [
@@ -677,7 +677,7 @@ export function buildBiayaStats(rows: ExpenseRow[]): MetricCardData[] {
       positive: true,
     },
     {
-      label: 'Sudah posting',
+      label: 'Sudah dibukukan',
       value: String(posted),
       delta: `${postedPct}%`,
       positive: postedPct >= 50,
@@ -689,7 +689,7 @@ export function buildBiayaStats(rows: ExpenseRow[]): MetricCardData[] {
       positive: true,
     },
     {
-      label: 'Draft',
+      label: 'Draf',
       value: String(drafts.length),
       delta: drafts.length > 0 ? `${draftPct}%` : '0%',
       positive: drafts.length === 0,

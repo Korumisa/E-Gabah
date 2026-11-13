@@ -74,8 +74,8 @@ export type PurchaseStage =
   | 'selesai'
 
 export const STAGE_LABEL: Record<PurchaseStage, string> = {
-  draft: 'Draft',
-  diajukan: 'Menunggu approve',
+  draft: 'Draf',
+  diajukan: 'Menunggu persetujuan',
   disetujui: 'Disetujui keuangan',
   ditolak: 'Ditolak',
   ditimbang: 'Ditimbang',

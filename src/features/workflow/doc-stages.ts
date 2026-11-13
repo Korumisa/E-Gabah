@@ -6,10 +6,10 @@ export type ReturnStage =
   | 'ditolak'
 
 export const RETURN_STAGE_LABEL: Record<ReturnStage, string> = {
-  draft: 'Draft',
+  draft: 'Draf',
   diajukan: 'Diajukan',
   disetujui: 'Disetujui',
-  posted: 'Posted',
+  posted: 'Dibukukan',
   ditolak: 'Ditolak',
 }
 

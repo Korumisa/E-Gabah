@@ -384,7 +384,7 @@ export function PenjualanProvider({ children }: { children: ReactNode }) {
         return 'Order tidak dapat dibatalkan.'
       }
       if (returns.some((r) => r.orderId === id && r.stage === 'posted')) {
-        return 'Void ditolak: masih ada retur posted. Void/batalkan retur dulu.'
+        return 'Tidak bisa dibatalkan: masih ada retur yang sudah dibukukan. Batalkan retur dulu.'
       }
       const locked = assertPeriodOpen(todayIsoDate())
       if (locked) return locked

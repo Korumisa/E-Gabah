@@ -57,17 +57,17 @@ import { usePageSize } from '@/features/settings/usePageSize'
 
 const FILTERS = [
   { value: 'semua' as const, label: 'Semua tahap' },
-  { value: 'draft' as const, label: 'Draft' },
-  { value: 'posted' as const, label: 'Posted' },
-  { value: 'void' as const, label: 'Void' },
+  { value: 'draft' as const, label: 'Draf' },
+  { value: 'posted' as const, label: 'Dibukukan' },
+  { value: 'void' as const, label: 'Dibatalkan' },
 ]
 
 type StageFilter = (typeof FILTERS)[number]['value']
 type SortKey = 'id' | 'batch' | 'qty' | 'date' | 'stage'
 
 function packStageLabel(run: PackRun): string {
-  if (run.voidedAt) return 'Void'
-  return run.stage === 'posted' ? 'Posted' : 'Draft'
+  if (run.voidedAt) return 'Dibatalkan'
+  return run.stage === 'posted' ? 'Dibukukan' : 'Draf'
 }
 
 function packStageTone(run: PackRun): 'neutral' | 'good' | 'warn' | 'danger' {
@@ -151,19 +151,19 @@ export function PackingPage() {
 
   const stats: MetricCardData[] = [
     {
-      label: 'Draft',
+      label: 'Draf',
       value: String(counts.draft),
       delta: counts.draft ? 'Belum diposting' : 'Kosong',
       positive: true,
     },
     {
-      label: 'Posted',
+      label: 'Dibukukan',
       value: String(counts.posted),
       delta: counts.posted ? 'Stok kemasan' : ',',
       positive: true,
     },
     {
-      label: 'Void',
+      label: 'Dibatalkan',
       value: String(counts.void),
       delta: counts.void ? 'Dibatalkan' : ',',
       positive: counts.void === 0,
@@ -510,7 +510,7 @@ function PackDrawer({
 
   function saveNew() {
     if (!batch || !sourceSku) {
-      setError('Pilih batch selesai dan SKU sumber.')
+      setError('Pilih batch selesai dan kode sumber.')
       return
     }
     const parsed = buildLines()
@@ -612,7 +612,7 @@ function PackDrawer({
             label="Batch selesai"
             requiredMark
             value={batchId}
-            placeholder="Pilih batch done"
+            placeholder="Pilih batch selesai"
             options={doneBatches.map((b) => ({
               value: b.id,
               label: b.id,
@@ -685,12 +685,12 @@ function PackDrawer({
             <DrawerFacts
               items={[
                 ['Batch', row.batchId],
-                ['SKU sumber', row.sourceSku],
+                ['Kode sumber', row.sourceSku],
                 ['Total qty', formatKg(sumPackRunOutQty(row))],
                 row.postedAt
                   ? ['Diposting', formatDate(dateKey(row.postedAt))]
                   : null,
-                row.voidedAt ? ['Void', formatDate(dateKey(row.voidedAt))] : null,
+                row.voidedAt ? ['Dibatalkan', formatDate(dateKey(row.voidedAt))] : null,
               ]}
             />
           </DrawerSection>

@@ -55,10 +55,10 @@ import {
 
 const FILTERS = [
   { value: 'semua' as const, label: 'Semua tahap' },
-  { value: 'draft' as const, label: 'Draft' },
+  { value: 'draft' as const, label: 'Draf' },
   { value: 'diajukan' as const, label: 'Diajukan' },
   { value: 'disetujui' as const, label: 'Disetujui' },
-  { value: 'posted' as const, label: 'Posted' },
+  { value: 'posted' as const, label: 'Dibukukan' },
   { value: 'ditolak' as const, label: 'Ditolak' },
 ]
 
@@ -138,7 +138,7 @@ export function ReturPage() {
 
   const stats: MetricCardData[] = [
     {
-      label: 'Draft',
+      label: 'Draf',
       value: String(counts.draft),
       delta: counts.draft ? 'Belum diajukan' : 'Kosong',
       positive: true,
@@ -156,7 +156,7 @@ export function ReturPage() {
       positive: true,
     },
     {
-      label: 'Posted',
+      label: 'Dibukukan',
       value: String(counts.posted),
       delta: counts.posted ? 'Stok & piutang' : ',',
       positive: true,

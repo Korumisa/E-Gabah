@@ -93,6 +93,6 @@ export const ORG_LIST_META: Record<
   },
   branches: {
     label: 'Cabang / lokasi',
-    hint: 'Lokasi kerja mill atau kantor',
+    hint: 'Lokasi kerja pabrik atau kantor',
   },
 }

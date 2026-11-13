@@ -66,7 +66,7 @@ function qcTone(qc: LotQc | undefined): 'neutral' | 'good' | 'warn' | 'danger' {
 function qcLabel(qc: LotQc | undefined): string {
   if (!qc) return 'Belum'
   if (qc.passed) return 'Lulus'
-  if (qc.overrideReason) return 'Override'
+  if (qc.overrideReason) return 'Diubah admin'
   return 'Gagal'
 }
 
@@ -428,7 +428,7 @@ function QcDrawer({
             ['Gabah', purchase.grain],
             ['Tanggal', formatDate(purchase.date)],
             qc?.by ? ['Terakhir', qc.by] : null,
-            qc?.overrideReason ? ['Override', qc.overrideReason] : null,
+            qc?.overrideReason ? ['Diubah admin', qc.overrideReason] : null,
           ]}
         />
       </DrawerSection>

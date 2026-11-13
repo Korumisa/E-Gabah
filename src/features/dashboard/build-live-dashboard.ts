@@ -92,7 +92,7 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
       {
         label: 'Stok rendah',
         value: String(low.length),
-        delta: low.length ? 'Perlu isi' : 'OK',
+        delta: low.length ? 'Perlu isi' : 'Aman',
         positive: low.length === 0
       },
     ],
@@ -112,7 +112,7 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
       {
         label: 'Utang pemasok',
         value: idrShort(apSum),
-        delta: `${apOpen.length} open`,
+        delta: `${apOpen.length} terbuka`,
         positive: apSum === 0
       },
       {
@@ -132,29 +132,29 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
         positive: true
       },
       {
-        label: 'Avg rendemen',
+        label: 'Rata-rata rendemen',
         value: `${avgRend.toFixed(1)}%`,
         delta: 'batch selesai',
         positive: avgRend >= 60
       },
       {
-        label: 'Menunggu approve',
+        label: 'Menunggu persetujuan',
         value: String(
           input.batches.filter((b) => b.stage === 'submitted').length,
         ),
-        delta: 'review',
+        delta: 'perlu dicek',
         positive: true
       },
       {
         label: 'Selesai',
         value: String(doneBatches.length),
-        delta: 'posted',
+        delta: 'tercatat',
         positive: true
       },
     ],
     gudang: [
       {
-        label: 'SKU lokasi',
+        label: 'Baris stok',
         value: String(input.stocks.length),
         delta: 'baris saldo',
         positive: true
@@ -166,13 +166,13 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
         positive: low.length === 0
       },
       {
-        label: 'SKU aman',
+        label: 'Stok aman',
         value: String(Math.max(0, input.stocks.length - low.length)),
         delta: low.length ? `${low.length} rendah` : 'Aman',
         positive: low.length === 0
       },
       {
-        label: 'Batch proses',
+        label: 'Sedang digiling',
         value: String(
           input.batches.filter((b) => b.stage === 'processing').length,
         ),
@@ -216,13 +216,13 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
       {
         label: 'Piutang',
         value: idrShort(arSum),
-        delta: `${arOpen.length} open`,
+        delta: `${arOpen.length} terbuka`,
         positive: arSum === 0
       },
       {
         label: 'Utang',
         value: idrShort(apSum),
-        delta: `${apOpen.length} open`,
+        delta: `${apOpen.length} terbuka`,
         positive: apSum === 0
       },
       {
@@ -236,7 +236,7 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
       {
         label: 'Cuti menunggu',
         value: String(input.hrFocus?.pendingLeave ?? 0),
-        delta: (input.hrFocus?.pendingLeave ?? 0) ? 'Perlu review' : 'Kosong',
+        delta: (input.hrFocus?.pendingLeave ?? 0) ? 'Perlu dicek' : 'Kosong',
         positive: (input.hrFocus?.pendingLeave ?? 0) === 0,
       },
       {
@@ -256,7 +256,7 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
       {
         label: 'Antrian gaji',
         value: String(input.hrFocus?.payrollQueue ?? 0),
-        delta: (input.hrFocus?.payrollQueue ?? 0) ? 'Perlu stamp' : 'Kosong',
+        delta: (input.hrFocus?.payrollQueue ?? 0) ? 'Perlu persetujuan' : 'Kosong',
         positive: (input.hrFocus?.payrollQueue ?? 0) === 0,
       },
     ],
@@ -306,7 +306,7 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
     gudang: {
       title: 'Gudang',
       description: 'Saldo & peringatan stok',
-      chartTitle: 'SKU per lokasi',
+      chartTitle: 'Stok per lokasi',
     },
     penjualan: {
       title: 'Penjualan',
@@ -320,7 +320,7 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
     },
     hr: {
       title: 'SDM / HR',
-      description: 'Cuti, absensi, payroll approve',
+      description: 'Cuti, absensi, dan persetujuan gaji',
       chartTitle: 'Fokus SDM',
     },
   }
@@ -366,7 +366,7 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
       seriesName: 'Posisi',
     },
     pembelian: {
-      labels: ['Open', 'Diterima', 'Utang'],
+      labels: ['Terbuka', 'Diterima', 'Utang'],
       values: [
         openPurchases.length,
         toJt(buyValue),
@@ -376,7 +376,7 @@ export function buildLiveDashboard(input: LiveInput): DashboardView {
       seriesName: 'Pembelian',
     },
     penjualan: {
-      labels: ['Open', 'Omzet', 'Piutang'],
+      labels: ['Terbuka', 'Omzet', 'Piutang'],
       values: [openOrders.length, toJt(saleValue), toJt(arSum)],
       unit: 'dok / jt',
       seriesName: 'Penjualan',

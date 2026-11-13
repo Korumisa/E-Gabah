@@ -36,10 +36,6 @@ const BiayaPage = lazyPage(
   'BiayaPage',
 )
 const CoaPage = lazyPage(() => import('@/pages/modules/keuangan/CoaPage'), 'CoaPage')
-const EFakturPage = lazyPage(
-  () => import('@/pages/modules/keuangan/EFakturPage'),
-  'EFakturPage',
-)
 const PeriodePage = lazyPage(
   () => import('@/pages/modules/keuangan/PeriodePage'),
   'PeriodePage',
@@ -239,7 +235,7 @@ export function AppRouter() {
                 appName="E-Absensi"
                 appTagline="Kehadiran karyawan"
                 title="E-Absensi"
-                subtitle="Check-in / check-out dan cuti / izin"
+                subtitle="Catat masuk dan keluar, plus cuti atau izin"
                 navItems={[
                   { to: '/absensi', label: 'Absensi hari ini', end: true },
                   { to: '/absensi/cuti', label: 'Cuti & izin' },
@@ -292,9 +288,9 @@ export function AppRouter() {
               element={
                 <ModuleShell
                   appName="E-HR"
-                  appTagline="SDM & payroll"
+                  appTagline="SDM dan gaji"
                   title="E-HR"
-                  subtitle="Persetujuan cuti, rekap, roster, dan persiapan gaji"
+                  subtitle="Persetujuan cuti, rekap kehadiran, dan persiapan gaji"
                   navItems={[
                     { to: '/hr', label: 'Beranda', end: true },
                     { to: '/hr/persetujuan', label: 'Persetujuan cuti' },
@@ -374,7 +370,7 @@ export function AppRouter() {
               element={
                 <AppShell
                   title="Kotak masuk"
-                  subtitle="Pengajuan menunggu persetujuan, retur, batch, payroll, unlock periode"
+                  subtitle="Retur, anggaran, batch, gaji, dan buka periode yang menunggu"
                 />
               }
             >
@@ -557,7 +553,7 @@ export function AppRouter() {
               element={
                 <AppShell
                   title="Produksi"
-                  subtitle="Batch giling multi-output, approve, dan rendemen"
+                  subtitle="Batch giling, hasil beras, dan rendemen"
                 />
               }
             >
@@ -733,11 +729,7 @@ export function AppRouter() {
               />
               <Route
                 path="e-faktur"
-                element={
-                  <Lazy>
-                    <EFakturPage />
-                  </Lazy>
-                }
+                element={<Navigate to="/app/keuangan" replace />}
               />
               <Route
                 path="periode"
@@ -766,7 +758,7 @@ export function AppRouter() {
               element={
                 <AppShell
                   title="Laporan"
-                  subtitle="Ringkasan operasional, aging, stok, dan rendemen"
+                  subtitle="Ringkasan operasional, umur utang-piutang, stok, dan rendemen"
                 />
               }
             >
@@ -784,7 +776,7 @@ export function AppRouter() {
               path="/app/audit"
               element={
                 <AppShell
-                  title="Audit Log"
+                  title="Jejak audit"
                   subtitle="Jejak perubahan dokumen dan aksi penting"
                 />
               }

@@ -162,7 +162,7 @@ export function AbsensiCutiPage() {
       setToast(err)
       return
     }
-    setToast('Pengajuan terkirim — menunggu approve HR')
+    setToast('Pengajuan terkirim. Menunggu persetujuan HR.')
     setOpen(false)
     resetForm()
   }

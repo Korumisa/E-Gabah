@@ -112,7 +112,7 @@ export function LoginPage() {
             ) : (
               <>
                 <h1 className="text-[1.15rem] leading-snug font-semibold tracking-tight text-ink sm:text-[1.25rem]">
-                  Masuk ke portal mill
+                  Masuk ke portal
                 </h1>
                 <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted">
                   Peran diambil otomatis dari akun Anda.
@@ -183,7 +183,7 @@ export function LoginPage() {
             )}
 
             <p className="mt-8 text-[11px] leading-relaxed text-muted/80">
-              © {new Date().getFullYear()} E-Gabah · ERP Penggilingan Padi
+              © {new Date().getFullYear()} E-Gabah · Penggilingan padi
             </p>
           </section>
 

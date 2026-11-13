@@ -199,7 +199,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         id: 'payroll',
-        label: 'Payroll',
+        label: 'Gaji',
         path: '/app/keuangan/payroll',
         roles: ['admin', 'keuangan', 'hr'],
       },
@@ -219,12 +219,6 @@ export const NAV_GROUPS: NavGroup[] = [
         id: 'jurnal',
         label: 'Jurnal',
         path: '/app/keuangan/jurnal',
-        roles: ['admin', 'keuangan'],
-      },
-      {
-        id: 'e-faktur',
-        label: 'e-Faktur',
-        path: '/app/keuangan/e-faktur',
         roles: ['admin', 'keuangan'],
       },
       {
@@ -254,7 +248,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         id: 'laporan-ringkas',
-        label: 'Ringkasan & Aging',
+        label: 'Ringkasan & umur piutang',
         path: '/app/laporan',
         roles: ['admin', 'keuangan'],
       },

@@ -73,8 +73,8 @@ export function HrKaryawanPage() {
   return (
     <div className="space-y-2.5">
       <PageSection
-        title="Roster karyawan"
-        subtitle="Read-only dari master pengguna"
+        title="Daftar karyawan"
+        subtitle="Hanya lihat. Ubah lewat Master Pengguna."
       >
         <FinanceFilterBar
           search={search}

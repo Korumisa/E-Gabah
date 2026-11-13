@@ -201,12 +201,12 @@ export function PeriodProvider({ children }: { children: ReactNode }) {
       impact: ImpactSources,
     ): string | undefined => {
       const trimmed = reason.trim()
-      if (!trimmed) return 'Alasan unlock wajib diisi.'
+      if (!trimmed) return 'Alasan wajib diisi.'
       const lock = locks.find((l) => l.id === lockId)
       if (!lock) return 'Kunci periode tidak ditemukan.'
       if (!lock.active) return 'Kunci sudah tidak aktif.'
       if (lock.pendingUnlockRequestId) {
-        return 'Sudah ada permintaan unlock yang menunggu.'
+        return 'Sudah ada permintaan buka periode yang menunggu.'
       }
       const requiredRoles = computeRequiredRoles({
         ...impact,
@@ -243,7 +243,7 @@ export function PeriodProvider({ children }: { children: ReactNode }) {
       stamp: ApprovalStamp,
     ): Promise<string | undefined> => {
       const req = unlockRequests.find((r) => r.id === requestId)
-      if (!req) return 'Permintaan unlock tidak ditemukan.'
+      if (!req) return 'Permintaan tidak ditemukan.'
       if (req.status !== 'pending') return 'Permintaan tidak lagi menunggu.'
       if (stamp.role === 'admin') {
         return 'Gunakan persetujuan admin final.'
@@ -290,7 +290,7 @@ export function PeriodProvider({ children }: { children: ReactNode }) {
         return 'Hanya admin yang dapat menyetujui final.'
       }
       const req = unlockRequests.find((r) => r.id === requestId)
-      if (!req) return 'Permintaan unlock tidak ditemukan.'
+      if (!req) return 'Permintaan tidak ditemukan.'
       if (req.status !== 'pending') return 'Permintaan tidak lagi menunggu.'
       for (const role of req.requiredRoles) {
         if (!hasApproval(req.approvals, role)) {
@@ -355,7 +355,7 @@ export function PeriodProvider({ children }: { children: ReactNode }) {
       const trimmed = reason.trim()
       if (!trimmed) return 'Alasan penolakan wajib diisi.'
       const req = unlockRequests.find((r) => r.id === requestId)
-      if (!req) return 'Permintaan unlock tidak ditemukan.'
+      if (!req) return 'Permintaan tidak ditemukan.'
       if (req.status !== 'pending') return 'Permintaan tidak lagi menunggu.'
 
       if (isRelationalEnabled()) {

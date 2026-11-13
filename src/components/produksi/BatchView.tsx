@@ -369,11 +369,11 @@ export function BatchView({
                   type="button"
                   onClick={() => {
                     onSubmit(detail.id)
-                    setToast('Batch diajukan untuk approve')
+                    setToast('Batch diajukan')
                   }}
                   className="h-11 w-full rounded-xl border border-line text-[14px] font-medium text-ink transition hover:bg-surface"
                 >
-                  Ajukan approve
+                  Ajukan
                 </button>
               )}
               {detail.stage === 'submitted' && canApprove && (
@@ -422,15 +422,15 @@ export function BatchView({
                     const je = onComplete(detail.id)
                     if (je) {
                       setToast(
-                        `Batch selesai — stok diposting · jurnal gagal: ${je}`,
+                        `Batch selesai. Stok tercatat. Jurnal gagal: ${je}`,
                       )
                     } else {
-                      setToast('Batch selesai — stok diposting')
+                      setToast('Batch selesai. Stok tercatat.')
                     }
                   }}
                   className="h-11 w-full rounded-xl border border-line text-[14px] font-medium text-ink transition hover:bg-surface"
                 >
-                  Selesaikan & post stok
+                  Selesaikan dan catat stok
                 </button>
               )}
               {detail.stage !== 'void' &&
@@ -441,7 +441,7 @@ export function BatchView({
                     onClick={() => setPromptKind('void')}
                     className="h-11 w-full rounded-xl border border-red-200 text-[14px] font-medium text-red-700 transition hover:bg-red-50"
                   >
-                    Void
+                    Batalkan
                   </button>
                 )}
               {(detail.stage === 'draft' || detail.stage === 'rejected') && (
@@ -451,11 +451,11 @@ export function BatchView({
                     onDelete(detail.id)
                     setDetail(null)
                     onSelect(null)
-                    setToast('Draft dihapus')
+                    setToast('Draf dihapus')
                   }}
                   className="h-11 w-full rounded-xl border border-red-200 text-[14px] font-medium text-red-700 transition hover:bg-red-50"
                 >
-                  Hapus draft
+                  Hapus draf
                 </button>
               )}
             </>
@@ -468,7 +468,7 @@ export function BatchView({
                 ['Status', BATCH_STAGE_LABEL[detail.stage]],
                 ['Target rendemen', `${detail.targetRendemen}%`],
                 ['Aktual', `${actualRendemen(detail).toFixed(1)}%`],
-                ['Approve oleh', detail.approvedBy || ','],
+                ['Disetujui oleh', detail.approvedBy || ','],
               ]}
             />
           </DrawerSection>

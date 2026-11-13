@@ -173,7 +173,7 @@ export function AbsensiRekapPage() {
         >
           <AbsensiGeoMap
             title="Peta tim"
-            subtitle={`Titik check-in/out tanggal ${date}`}
+            subtitle={`Titik masuk/keluar tanggal ${date}`}
             pins={dayPins}
             emptyHint="Belum ada lokasi pada tanggal ini."
             className="h-full"

@@ -602,7 +602,7 @@ function PiutangDetailDrawer({
             ['Sudah diterima', formatIdr(row.paid)],
             ['Sisa', formatIdr(sisa)],
             [
-              'Aging',
+              'Umur',
               row.agingDays > 0
                 ? `${row.agingDays} hari terlambat`
                 : 'Tepat waktu',

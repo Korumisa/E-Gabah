@@ -65,7 +65,7 @@ export const APP_MODULES: AppModule[] = [
   {
     id: 'produksi',
     title: 'Produksi',
-    description: 'Batch giling multi-output dan rendemen',
+    description: 'Batch giling, hasil beras, dan rendemen',
     path: '/app/produksi',
     category: 'produksi',
     accent: '#a16207',

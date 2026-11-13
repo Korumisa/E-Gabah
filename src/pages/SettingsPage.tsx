@@ -825,7 +825,7 @@ export function SettingsPage() {
           {tab === 'perusahaan' ? (
             <SectionCard
               title="Profil organisasi"
-              description="Mengikuti pola ERP: identitas legal, kontak, bank, dan tahun buku — muncul di invoice & laporan."
+              description="Identitas usaha, kontak, bank, dan tahun buku. Muncul di faktur dan laporan."
               footer={
                 <SaveBar
                   dirty={dirty.company}
@@ -1008,8 +1008,7 @@ export function SettingsPage() {
                 />
               </div>
               <FieldHint>
-                Logo perusahaan: unggah menyusul (MVP menampilkan brand teks di
-                cetakan).
+                Logo perusahaan belum bisa diunggah. Cetakan memakai nama usaha.
               </FieldHint>
             </SectionCard>
           ) : null}
@@ -1017,7 +1016,7 @@ export function SettingsPage() {
           {tab === 'keuangan' ? (
             <SectionCard
               title="Pengaturan akuntansi"
-              description="Default PPN, tempo bayar, akun, dan kontrol bukti — ala Accounts Settings ERP."
+              description="PPN, tempo bayar, akun, dan wajib bukti."
               footer={
                 <SaveBar
                   dirty={dirty.finance}
@@ -1241,7 +1240,7 @@ export function SettingsPage() {
           {tab === 'dokumen' ? (
             <SectionCard
               title="Dokumen & cetakan"
-              description="Prefix nomor dokumen dan isi kop bukti (mirip print format Zoho/ERPNext)."
+              description="Awalan nomor dokumen dan kop bukti cetak."
               footer={
                 <SaveBar
                   dirty={dirty.docs}
@@ -1427,7 +1426,7 @@ export function SettingsPage() {
                         },
                         {
                           id: 'teal' as const,
-                          label: 'Teal mill',
+                          label: 'Hijau daun',
                           swatch: '#0f4540',
                         },
                       ] as const

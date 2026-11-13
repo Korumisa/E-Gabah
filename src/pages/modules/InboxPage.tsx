@@ -18,10 +18,10 @@ import { ROLE_LABELS } from '@/types/auth'
 const KIND_LABEL: Record<InboxItem['kind'], string> = {
   sale_return: 'Retur jual',
   purchase_return: 'Retur beli',
-  purchase_budget: 'Anggaran PO',
+  purchase_budget: 'Anggaran pembelian',
   batch: 'Batch produksi',
-  payroll: 'Payroll',
-  period_unlock: 'Unlock periode',
+  payroll: 'Gaji',
+  period_unlock: 'Buka periode',
 }
 
 function formatWhen(iso: string): string {
@@ -190,7 +190,7 @@ export function InboxPage() {
               Tidak ada pengajuan menunggu
             </p>
             <p className="mt-1 max-w-sm text-[12px] text-muted">
-              Retur, approve anggaran, batch, payroll, dan unlock periode akan
+              Retur, anggaran pembelian, batch, gaji, dan buka periode
               muncul di sini saat menunggu tindakan Anda.
             </p>
           </div>

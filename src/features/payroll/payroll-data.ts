@@ -38,14 +38,14 @@ export type PayrollRun = {
 }
 
 export const PAYROLL_STATUS_LABEL: Record<PayrollStatus, string> = {
-  draft: 'Draft',
+  draft: 'Draf',
   menunggu_hr: 'Menunggu HR',
   menunggu_admin: 'Menunggu admin',
   menunggu_keuangan: 'Menunggu keuangan',
-  menunggu_approve: 'Menunggu approve',
+  menunggu_approve: 'Menunggu persetujuan',
   siap_cair: 'Siap cair',
-  posted: 'Posted',
-  void: 'Void',
+  posted: 'Dibukukan',
+  void: 'Dibatalkan',
 }
 
 export function migratePayrollStatus(

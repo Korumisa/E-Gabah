@@ -99,7 +99,7 @@ export function HrQueueTable({
       out.push({
         id: `pay-${r.id}`,
         kind: 'payroll',
-        kindLabel: 'Payroll',
+        kindLabel: 'Gaji',
         title: r.id,
         detail: `Periode ${r.period} · ${formatIdr(runTotal(r))}`,
         when: r.createdAt,
@@ -154,7 +154,7 @@ export function HrQueueTable({
   return (
     <PageSection
       title="Antrian kerja"
-      subtitle="Cuti, payroll, dan keterlambatan yang perlu ditindak"
+      subtitle="Cuti, gaji, dan keterlambatan yang perlu ditindak"
       actions={
         <p className="text-[12px] text-muted tabular-nums">
           {filtered.length} item
@@ -173,7 +173,7 @@ export function HrQueueTable({
         filterOptions={[
           { value: 'all', label: 'Semua jenis' },
           { value: 'leave', label: 'Cuti / izin' },
-          { value: 'payroll', label: 'Payroll' },
+          { value: 'payroll', label: 'Gaji' },
           { value: 'late', label: 'Keterlambatan' },
         ]}
         onFilterChange={(v) => {

@@ -48,7 +48,7 @@ export function buildNotifications(input: Input): AppNotification[] {
     items.push({
       id,
       title: `Utang jatuh tempo: ${p.supplier}`,
-      meta: `${p.invoice} · aging ${p.agingDays}h`,
+      meta: `${p.invoice} · umur ${p.agingDays} hari`,
       href: '/app/keuangan/utang',
       unread: !input.dismissed.has(id),
     })
@@ -61,7 +61,7 @@ export function buildNotifications(input: Input): AppNotification[] {
     items.push({
       id,
       title: `Piutang jatuh tempo: ${r.customer}`,
-      meta: `${r.invoice} · aging ${r.agingDays}h`,
+      meta: `${r.invoice} · umur ${r.agingDays} hari`,
       href: '/app/keuangan/piutang',
       unread: !input.dismissed.has(id),
     })
@@ -73,7 +73,7 @@ export function buildNotifications(input: Input): AppNotification[] {
       const id = `pb-sub-${p.id}`
       items.push({
         id,
-        title: 'Pembelian menunggu approve',
+        title: 'Pembelian menunggu persetujuan',
         meta: p.id,
         href: `/app/pembelian?dok=${encodeURIComponent(p.id)}`,
         unread: !input.dismissed.has(id),
@@ -127,7 +127,7 @@ export function buildNotifications(input: Input): AppNotification[] {
           : `/hr/payroll/persetujuan`
       items.push({
         id,
-        title: `Payroll ${run.status.replace('menunggu_', 'menunggu ')}`,
+        title: 'Gaji menunggu persetujuan',
         meta: `${run.id} · ${run.period}`,
         href,
         unread: !input.dismissed.has(id),
@@ -138,7 +138,7 @@ export function buildNotifications(input: Input): AppNotification[] {
       const id = `pr-cair-${run.id}`
       items.push({
         id,
-        title: 'Payroll siap cair',
+        title: 'Gaji siap cair',
         meta: `${run.id} · ${run.period}`,
         href: `/app/keuangan/payroll?dok=${encodeURIComponent(run.id)}`,
         unread: !input.dismissed.has(id),
@@ -151,7 +151,7 @@ export function buildNotifications(input: Input): AppNotification[] {
     const id = `bat-sub-${b.id}`
     items.push({
       id,
-      title: `Batch menunggu approve`,
+      title: 'Batch menunggu persetujuan',
       meta: b.id,
       href: `/app/produksi?dok=${encodeURIComponent(b.id)}`,
       unread: !input.dismissed.has(id),

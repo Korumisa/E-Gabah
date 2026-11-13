@@ -29,7 +29,7 @@ const APPS: PortalApp[] = [
   {
     id: 'egabah',
     title: 'E-Gabah',
-    description: 'ERP penggilingan: pembelian, produksi, stok, penjualan, keuangan',
+    description: 'Pembelian, produksi, stok, penjualan, dan keuangan',
     path: '/app/dashboard',
     category: 'operasional',
     icon: 'mill',
@@ -46,7 +46,7 @@ const APPS: PortalApp[] = [
   {
     id: 'eabsensi',
     title: 'E-Absensi',
-    description: 'Check-in / check-out dan ajukan cuti / izin',
+    description: 'Catat masuk dan keluar, ajukan cuti atau izin',
     path: '/absensi',
     category: 'sdm',
     icon: 'clock',
@@ -54,7 +54,7 @@ const APPS: PortalApp[] = [
   {
     id: 'ehr',
     title: 'E-HR',
-    description: 'Persetujuan cuti, rekap SDM, roster, dan persiapan gaji',
+    description: 'Persetujuan cuti, rekap kehadiran, dan persiapan gaji',
     path: '/hr',
     category: 'sdm',
     icon: 'people',

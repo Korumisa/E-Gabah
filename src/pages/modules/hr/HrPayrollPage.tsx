@@ -142,11 +142,11 @@ export function HrPayrollPage() {
     <div className="space-y-2.5">
       {queue.length > 0 ? (
         <PageSection
-          title="Menunggu approve Anda"
+          title="Menunggu persetujuan Anda"
           subtitle={
             user.role === 'hr'
-              ? 'Stamp HR sebelum diteruskan ke admin'
-              : 'Stamp admin sebelum diteruskan ke keuangan'
+              ? 'Persetujuan HR sebelum diteruskan ke admin'
+              : 'Persetujuan admin sebelum diteruskan ke keuangan'
           }
           actions={<FinanceToast message={toast} />}
         >
@@ -174,7 +174,7 @@ export function HrPayrollPage() {
                           user.role === 'hr'
                             ? approveAsHr(run.id)
                             : approveAsAdmin(run.id)
-                        setToast(err ?? 'Approve tercatat')
+                        setToast(err ?? 'Persetujuan tercatat')
                       }}
                     >
                       Approve
@@ -241,7 +241,7 @@ export function HrPayrollPage() {
                             user.role === 'hr'
                               ? approveAsHr(run.id)
                               : approveAsAdmin(run.id)
-                          setToast(err ?? 'Approve tercatat')
+                          setToast(err ?? 'Persetujuan tercatat')
                         }}
                       >
                         Approve
@@ -273,7 +273,7 @@ export function HrPayrollPage() {
 
       <PageSection
         title="Persiapan gaji"
-        subtitle="Susun draft gaji periode, ajukan ke alur approve, lalu pantau status sampai cair di keuangan"
+        subtitle="Susun draf gaji, ajukan persetujuan, lalu pantau sampai cair di keuangan"
         actions={
           queue.length === 0 ? <FinanceToast message={toast} /> : null
         }
@@ -289,13 +289,13 @@ export function HrPayrollPage() {
           filterLabel="Status"
           filterOptions={[
             { value: 'all', label: 'Semua status' },
-            { value: 'draft', label: 'Draft' },
+            { value: 'draft', label: 'Draf' },
             { value: 'menunggu_hr', label: 'Menunggu HR' },
             { value: 'menunggu_admin', label: 'Menunggu admin' },
             { value: 'menunggu_keuangan', label: 'Menunggu keuangan' },
             { value: 'siap_cair', label: 'Siap cair' },
-            { value: 'posted', label: 'Posted' },
-            { value: 'void', label: 'Void' },
+            { value: 'posted', label: 'Dibukukan' },
+            { value: 'void', label: 'Dibatalkan' },
           ]}
           onFilterChange={(v) => {
             setStatusFilter(v)
